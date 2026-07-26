@@ -21,16 +21,6 @@ export default function Navbar({ founder, lang, setLang, theme, setTheme, onOpen
         {/* Top Right Action Buttons */}
         <div className="play-nav-actions">
           <button 
-            className="play-icon-btn admin-badge-btn" 
-            onClick={onOpenAdminPanel}
-            title="Admin Control Panel"
-            style={{ border: '1px solid rgba(0, 230, 118, 0.4)', background: 'rgba(0, 230, 118, 0.12)', color: '#00e676' }}
-          >
-            <ShieldCheck size={16} />
-            <span className="btn-lang-text" style={{ fontWeight: '700' }}>Admin</span>
-          </button>
-
-          <button 
             className="play-icon-btn" 
             onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')}
             title="Switch Language"
@@ -66,15 +56,6 @@ export default function Navbar({ founder, lang, setLang, theme, setTheme, onOpen
       <div className="marquee-nav-wrapper">
         <div className="play-custom-category-grid marquee-track">
           {/* Main Pills Set */}
-          <button 
-            onClick={onOpenAdminPanel} 
-            className="cat-pill color-green"
-            style={{ cursor: 'pointer', border: 'none', font: 'inherit' }}
-          >
-            <Settings size={16} />
-            <span>Admin Panel</span>
-          </button>
-
           <a href="#apps" className="cat-pill color-green">
             <Smartphone size={16} />
             <span>Mobile Apps</span>
@@ -115,15 +96,6 @@ export default function Navbar({ founder, lang, setLang, theme, setTheme, onOpen
           </a>
 
           {/* Duplicate Set for Loop */}
-          <button 
-            onClick={onOpenAdminPanel} 
-            className="cat-pill color-green"
-            style={{ cursor: 'pointer', border: 'none', font: 'inherit' }}
-          >
-            <Settings size={16} />
-            <span>Admin Panel</span>
-          </button>
-
           <a href="#apps" className="cat-pill color-green">
             <Smartphone size={16} />
             <span>Mobile Apps</span>

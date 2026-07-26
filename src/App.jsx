@@ -70,15 +70,16 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    const updateClock = () => {
-      const now = new Date();
-      const hours = now.getHours().toString().padStart(2, '0');
-      const mins = now.getMinutes().toString().padStart(2, '0');
-      setCurrentTime(`${hours}:${mins}`);
+    const checkSecretAdminRoute = () => {
+      const hash = window.location.hash;
+      const query = window.location.search;
+      if (hash === '#admin' || query.includes('admin=true') || query.includes('admin')) {
+        setIsAdminPanelOpen(true);
+      }
     };
-    updateClock();
-    const interval = setInterval(updateClock, 30000);
-    return () => clearInterval(interval);
+    checkSecretAdminRoute();
+    window.addEventListener('hashchange', checkSecretAdminRoute);
+    return () => window.removeEventListener('hashchange', checkSecretAdminRoute);
   }, []);
 
   const t = translations[lang] || translations.bn;

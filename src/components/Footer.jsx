@@ -54,14 +54,6 @@ export default function Footer({ founder, siteSettings, lang, t, onOpenAdminPane
           <h4>{lang === 'bn' ? 'ডেভেলপার এন্ড সাপোর্ট' : 'Developer & Support'}</h4>
           <p className="footer-contact-item"><Mail size={14} /> {emailVal}</p>
           <p className="footer-contact-item"><Smartphone size={14} /> {locationVal}</p>
-          <p 
-            className="footer-dev-trigger" 
-            onClick={onOpenAdminPanel}
-            title="Open Admin Control Panel"
-            style={{ cursor: 'pointer', marginTop: '10px' }}
-          >
-            🔒 {lang === 'bn' ? 'অ্যাডমিন প্যানেল এডিটর ⚙️' : 'Admin Control Panel ⚙️'}
-          </p>
         </div>
       </div>
 
