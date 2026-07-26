@@ -678,3 +678,90 @@
   border-radius: 8px;
   cursor: pointer;
 }
+
+/* Mobile Responsiveness Rules for Admin Panel */
+@media (max-width: 768px) {
+  .admin-modal-overlay {
+    padding: 6px;
+  }
+
+  .admin-panel-container {
+    max-height: 98vh;
+    border-radius: 14px;
+  }
+
+  .admin-panel-header {
+    padding: 12px 14px;
+  }
+
+  .admin-header-title {
+    gap: 8px;
+  }
+
+  .admin-header-title h2 {
+    font-size: 1.05rem;
+  }
+
+  .admin-subtext {
+    font-size: 0.72rem;
+  }
+
+  .admin-tabs-bar {
+    padding: 4px 6px;
+  }
+
+  .admin-tab-btn {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+
+  .admin-panel-body {
+    padding: 14px 10px;
+  }
+
+  .admin-app-item-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .app-card-left {
+    width: 100%;
+  }
+
+  .app-card-right-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .admin-form-grid-2col {
+    grid-template-columns: 1fr;
+  }
+
+  .manual-tester-inline-form {
+    flex-direction: column;
+  }
+
+  .manual-tester-inline-form input,
+  .manual-tester-inline-form select,
+  .manual-tester-inline-form button {
+    width: 100%;
+  }
+
+  .admin-submodal-card {
+    padding: 16px;
+    max-height: 94vh;
+  }
+
+  .wrap-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .wrap-actions button,
+  .wrap-actions label {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
