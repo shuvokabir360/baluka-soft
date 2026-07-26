@@ -452,51 +452,6 @@
     overflow-y: visible;
   }
 
-/* Running Marquee Category Menu Animation */
-.marquee-nav-wrapper {
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-  padding: 8px 0 12px;
-  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-}
-
-.marquee-track {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  width: max-content !important;
-  gap: 12px !important;
-  animation: marqueeScroll 24s linear infinite;
-  will-change: transform;
-}
-
-.marquee-nav-wrapper:hover .marquee-track,
-.marquee-track:hover,
-.marquee-track:focus-within {
-  animation-play-state: paused !important;
-}
-
-@keyframes marqueeScroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.cat-pill {
-  width: auto !important;
-  flex: 0 0 auto !important;
-  padding: 10px 20px !important;
-  font-size: 0.88rem !important;
-  font-weight: 600 !important;
-  border-radius: 24px !important;
-  white-space: nowrap !important;
-}
-
   .play-beta-card {
     padding: 40px;
   }
@@ -527,15 +482,6 @@
     border: none;
     border-radius: 0;
     box-shadow: none;
-  }
-  .play-custom-category-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    padding: 8px 16px 14px;
-  }
-  .pill-full-mobile {
-    grid-column: 1 / -1;
   }
 }
 
@@ -685,51 +631,76 @@
   font-size: 0.9rem;
 }
 
-/* 3-Row Color Categorized Navigation Grid - Sticky Pinned */
-.play-custom-category-grid {
-  position: sticky;
-  top: 0;
-  z-index: 999;
+/* Horizontal Running Marquee Category Navigation Bar */
+.marquee-nav-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+  padding: 6px 0 10px;
   background-color: var(--bg-primary);
-  padding: 8px 16px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   border-bottom: 1px solid var(--border-color);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.cat-row-single {
-  display: flex;
-  width: 100%;
+.marquee-nav-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
-.cat-row-double {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  width: 100%;
+.marquee-track,
+.play-custom-category-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  width: max-content !important;
+  gap: 10px !important;
+  padding: 2px 12px !important;
+  animation: marqueeScroll 24s linear infinite;
+  will-change: transform;
+}
+
+.marquee-nav-wrapper:hover .marquee-track,
+.marquee-track:hover,
+.marquee-track:focus-within {
+  animation-play-state: paused !important;
+}
+
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .cat-pill {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: var(--radius-pill);
-  font-size: 0.85rem;
-  font-weight: 600;
-  width: 100%;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  text-decoration: none;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+  padding: 8px 16px !important;
+  border-radius: 24px !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
 }
 
 .cat-pill:hover {
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.02);
   filter: brightness(1.15);
 }
+
 
 /* Distinct Sleek Professional Colors for Each Menu Pill */
 .color-green {
