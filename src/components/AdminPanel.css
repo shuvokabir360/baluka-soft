@@ -822,4 +822,26 @@
   background: rgba(0, 230, 118, 0.3);
 }
 
+.admin-upload-btn.prominent {
+  background: linear-gradient(135deg, rgba(0, 230, 118, 0.25), rgba(0, 176, 255, 0.2));
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.5);
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.15);
+}
+
+.admin-upload-btn.prominent.blue {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(59, 130, 246, 0.2));
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+}
+
+.admin-upload-btn.prominent:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+
 

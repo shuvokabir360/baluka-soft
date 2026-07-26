@@ -952,13 +952,16 @@ export default function AdminPanel({
 
                 {/* App Icon Upload System */}
                 <div className="admin-input-field">
-                  <label>App Icon (অ্যাপের আইকন লোগো)</label>
-                  <div className="admin-image-uploader-box">
+                  <label style={{ color: '#00e676', fontWeight: '700' }}>
+                    <ImageIcon size={15} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+                    {lang === 'bn' ? 'অ্যাপের আইকন লোগো (Upload App Icon)' : 'App Icon Logo (Upload File)'}
+                  </label>
+                  <div className="admin-image-uploader-box highlight">
                     <img src={appFormData.icon} alt="App Icon Preview" className="image-preview-thumb app-icon" />
                     <div className="uploader-controls">
-                      <label className="admin-upload-btn">
-                        <Upload size={14} />
-                        <span>{lang === 'bn' ? 'আইকন ফাইল আপলোড' : 'Upload Icon File'}</span>
+                      <label className="admin-upload-btn prominent">
+                        <Upload size={16} />
+                        <span>{lang === 'bn' ? '📁 আইকন ফাইল সিলেক্ট করুন' : '📁 Upload Icon File'}</span>
                         <input 
                           type="file" 
                           accept="image/*"
@@ -968,7 +971,7 @@ export default function AdminPanel({
                       </label>
                       <input 
                         type="text" 
-                        placeholder="or Image URL..."
+                        placeholder={lang === 'bn' ? 'অথবা ইমেজ URL / পাথ...' : 'or Image URL...'}
                         value={appFormData.icon}
                         onChange={e => setAppFormData({ ...appFormData, icon: e.target.value })}
                       />
@@ -978,13 +981,16 @@ export default function AdminPanel({
 
                 {/* App Banner Upload System */}
                 <div className="admin-input-field">
-                  <label>App Banner (অ্যাপের ব্যানার/কভার)</label>
-                  <div className="admin-image-uploader-box">
+                  <label style={{ color: '#38bdf8', fontWeight: '700' }}>
+                    <ImageIcon size={15} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+                    {lang === 'bn' ? 'অ্যাপের ব্যানার/কভার (Upload App Banner)' : 'App Banner / Cover (Upload File)'}
+                  </label>
+                  <div className="admin-image-uploader-box highlight">
                     <img src={appFormData.banner || appFormData.icon} alt="App Banner Preview" className="image-preview-thumb banner" />
                     <div className="uploader-controls">
-                      <label className="admin-upload-btn">
-                        <Upload size={14} />
-                        <span>{lang === 'bn' ? 'ব্যানার ফাইল আপলোড' : 'Upload Banner File'}</span>
+                      <label className="admin-upload-btn prominent blue">
+                        <Upload size={16} />
+                        <span>{lang === 'bn' ? '📁 ব্যানার ফাইল সিলেক্ট করুন' : '📁 Upload Banner File'}</span>
                         <input 
                           type="file" 
                           accept="image/*"
@@ -994,7 +1000,7 @@ export default function AdminPanel({
                       </label>
                       <input 
                         type="text" 
-                        placeholder="or Banner URL..."
+                        placeholder={lang === 'bn' ? 'অথবা ব্যানার URL / পাথ...' : 'or Banner URL...'}
                         value={appFormData.banner || ''}
                         onChange={e => setAppFormData({ ...appFormData, banner: e.target.value })}
                       />
