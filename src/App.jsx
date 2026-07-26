@@ -140,17 +140,6 @@ export default function App() {
 
       {/* Main Mobile App Phone Shell */}
       <div className="mobile-app-shell">
-        {/* Android Status Bar Mockup */}
-        <div className="mobile-status-bar">
-          <span className="status-time">{currentTime}</span>
-          <div className="status-camera-notch"></div>
-          <div className="status-icons">
-            <Signal size={13} />
-            <Wifi size={13} />
-            <BatteryMedium size={14} />
-          </div>
-        </div>
-
         {/* Scrollable Mobile App Content Body */}
         <main className="mobile-app-body">
           {/* Header Navbar inside scroll container */}
