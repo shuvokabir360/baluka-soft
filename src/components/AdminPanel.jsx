@@ -33,6 +33,10 @@ export default function AdminPanel({
   const [editingApp, setEditingApp] = useState(null); // null when not editing/adding
   const [appFormData, setAppFormData] = useState(getEmptyAppForm());
 
+  // Password Change Form State
+  const [pwdChangeForm, setPwdChangeForm] = useState({ current: '', newPwd: '', confirmPwd: '' });
+  const [showPwdFormToggle, setShowPwdFormToggle] = useState(false);
+
   // Toast alert
   const [toastMsg, setToastMsg] = useState('');
 
@@ -42,6 +46,32 @@ export default function AdminPanel({
     setToastMsg(msg);
     setTimeout(() => setToastMsg(''), 3000);
   }
+
+  const handleUpdateAdminPassword = (e) => {
+    e.preventDefault();
+    const currentSaved = siteSettings?.adminPassword || 'admin';
+    
+    if (pwdChangeForm.current !== currentSaved) {
+      alert(lang === 'bn' ? 'বর্তমান পাসওয়ার্ডটি সঠিক নয়!' : 'Current password does not match!');
+      return;
+    }
+
+    if (!pwdChangeForm.newPwd) {
+      alert(lang === 'bn' ? 'নতুন পাসওয়ার্ড প্রদান করুন!' : 'Please enter a new password!');
+      return;
+    }
+
+    if (pwdChangeForm.newPwd !== pwdChangeForm.confirmPwd) {
+      alert(lang === 'bn' ? 'নতুন দুটি পাসওয়ার্ড মিলছে না!' : 'New passwords do not match!');
+      return;
+    }
+
+    const updatedSettings = { ...siteSettings, adminPassword: pwdChangeForm.newPwd };
+    setSiteSettings(updatedSettings);
+    localStorage.setItem('baluka_soft_site_settings', JSON.stringify(updatedSettings));
+    setPwdChangeForm({ current: '', newPwd: '', confirmPwd: '' });
+    showToast(lang === 'bn' ? 'অ্যাডমিন পাসওয়ার্ড সফলভাবে আপডেট হয়েছে! 🔑' : 'Admin password updated successfully! 🔑');
+  };
 
   function getEmptyAppForm() {
     return {
@@ -836,18 +866,63 @@ export default function AdminPanel({
                 </div>
 
                 <div className="admin-form-grid-2col">
-                  {/* Password Change */}
+                  {/* Password Change Form Section */}
                   <div className="admin-card-section">
-                    <h4>🔒 Admin Password (পাসওয়ার্ড পরিবর্তন)</h4>
-                    <div className="admin-input-field">
-                      <label>Current Admin Password</label>
-                      <input 
-                        type="text" 
-                        value={siteSettings.adminPassword || 'admin'}
-                        onChange={e => handleSiteSettingChange('adminPassword', e.target.value)}
-                      />
-                      <small className="help-text">{lang === 'bn' ? 'লগইন করার সময় এই পাসওয়ার্ডটি ব্যবহার হবে।' : 'Use this password to unlock admin panel.'}</small>
-                    </div>
+                    <h4 style={{ color: '#00e676', display: 'flex', items: 'center', gap: '8px' }}>
+                      <Key size={18} />
+                      <span>{lang === 'bn' ? '🔑 অ্যাডমিন পাসওয়ার্ড পরিবর্তন' : '🔑 Change Admin Password'}</span>
+                    </h4>
+
+                    <form onSubmit={handleUpdateAdminPassword} className="change-password-form">
+                      <div className="admin-input-field">
+                        <label>{lang === 'bn' ? 'বর্তমান পাসওয়ার্ড (Current Password)' : 'Current Password'}</label>
+                        <input 
+                          type={showPwdFormToggle ? 'text' : 'password'}
+                          required
+                          placeholder={lang === 'bn' ? 'বর্তমান পাসওয়ার্ডটি লিখুন...' : 'Enter current password...'}
+                          value={pwdChangeForm.current}
+                          onChange={e => setPwdChangeForm({ ...pwdChangeForm, current: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="admin-input-field">
+                        <label>{lang === 'bn' ? 'নতুন পাসওয়ার্ড (New Password)' : 'New Password'}</label>
+                        <input 
+                          type={showPwdFormToggle ? 'text' : 'password'}
+                          required
+                          placeholder={lang === 'bn' ? 'নতুন পাসওয়ার্ডটি লিখুন...' : 'Enter new password...'}
+                          value={pwdChangeForm.newPwd}
+                          onChange={e => setPwdChangeForm({ ...pwdChangeForm, newPwd: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="admin-input-field">
+                        <label>{lang === 'bn' ? 'পুনরায় নতুন পাসওয়ার্ড (Confirm New Password)' : 'Confirm New Password'}</label>
+                        <input 
+                          type={showPwdFormToggle ? 'text' : 'password'}
+                          required
+                          placeholder={lang === 'bn' ? 'পুনরায় নতুন পাসওয়ার্ড লিখুন...' : 'Re-enter new password...'}
+                          value={pwdChangeForm.confirmPwd}
+                          onChange={e => setPwdChangeForm({ ...pwdChangeForm, confirmPwd: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between mt-2">
+                        <button 
+                          type="button" 
+                          className="pwd-toggle-text-btn"
+                          onClick={() => setShowPwdFormToggle(!showPwdFormToggle)}
+                          style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '0.8rem', cursor: 'pointer' }}
+                        >
+                          {showPwdFormToggle ? '🙈 Hide Passwords' : '👁️ Show Passwords'}
+                        </button>
+
+                        <button type="submit" className="admin-btn-success">
+                          <Save size={15} />
+                          <span>{lang === 'bn' ? 'পাসওয়ার্ড সেভ করুন' : 'Update Password'}</span>
+                        </button>
+                      </div>
+                    </form>
                   </div>
 
                   {/* Export / Import Backup JSON */}
