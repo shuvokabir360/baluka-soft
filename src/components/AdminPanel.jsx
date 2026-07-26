@@ -3,7 +3,7 @@ import {
   X, Plus, Edit3, Trash2, Save, Download, Upload, RotateCcw, 
   ShieldCheck, Lock, Smartphone, User, Settings, Mail, Globe, 
   Code2, Sparkles, Key, CheckCircle2, Layers, Sliders, Database,
-  Eye, EyeOff, AlertTriangle, ArrowRight, ExternalLink
+  Eye, EyeOff, AlertTriangle, ArrowRight, ExternalLink, Image as ImageIcon
 } from 'lucide-react';
 import { appsData as initialAppsData, founderDetails as initialFounderDetails, defaultSiteSettings } from '../data/appsData';
 import './AdminPanel.css';
@@ -66,6 +66,22 @@ export default function AdminPanel({
       isFeaturedBeta: false
     };
   }
+
+  // --- Image Upload Helper (Converts File -> Base64 Data URL) ---
+  const handleFileUpload = (e, callback) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert(lang === 'bn' ? 'দয়া করে একটি সঠিক ইমেজ ফাইল সিলেক্ট করুন (PNG, JPG, SVG, WebP)' : 'Please select a valid image file (PNG, JPG, SVG, WebP)');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      callback(evt.target.result);
+      showToast(lang === 'bn' ? 'ইমেজ আপলোড হয়েছে! 🖼️' : 'Image uploaded successfully! 🖼️');
+    };
+    reader.readAsDataURL(file);
+  };
 
   // --- Auth Handler ---
   const handleLogin = (e) => {
@@ -139,15 +155,6 @@ export default function AdminPanel({
     const updated = {
       ...founder,
       socials: { ...founder.socials, [key]: value }
-    };
-    setFounder(updated);
-    localStorage.setItem('baluka_soft_founder', JSON.stringify(updated));
-  };
-
-  const handleFounderStatsChange = (key, value) => {
-    const updated = {
-      ...founder,
-      stats: { ...founder.stats, [key]: value }
     };
     setFounder(updated);
     localStorage.setItem('baluka_soft_founder', JSON.stringify(updated));
@@ -306,7 +313,7 @@ export default function AdminPanel({
             <div>
               <h2>Baluka Soft Admin Control Panel</h2>
               <p className="admin-subtext">
-                {lang === 'bn' ? 'ফ্রন্টএন্ডের সকল কনটেন্ট লাইভ আপডেট, এডিট ও অ্যাড করুন' : 'Real-time Content Management & Frontend Control Center'}
+                {lang === 'bn' ? 'ফ্রন্টএন্ডের সকল কনটেন্ট ও লোগো লাইভ আপডেট, এডিট ও যোগ করুন' : 'Real-time Content Management & Frontend Control Center'}
               </p>
             </div>
           </div>
@@ -478,7 +485,7 @@ export default function AdminPanel({
                 <div className="tab-actions-header">
                   <div>
                     <h3>{lang === 'bn' ? 'প্রতিষ্ঠাতা ও স্টুডিও প্রোফাইল এডিটর' : 'Founder & Company Details'}</h3>
-                    <p className="subtext">{lang === 'bn' ? 'ডেভেলপারের তথ্য, বায়ো, ছবি ও স্কিল সেট সমুহ আপডেট করুন' : 'Edit founder info, bios, images, skills & social media links'}</p>
+                    <p className="subtext">{lang === 'bn' ? 'ডেভেলপারের তথ্য, বায়ো, ছবি, সাইট লোগো ও স্কিল সেট সমুহ আপডেট করুন' : 'Edit founder info, bios, images, site logo & skills'}</p>
                   </div>
                   <button className="admin-btn-primary" onClick={() => showToast('Founder details saved!')}>
                     <Save size={16} />
@@ -517,13 +524,56 @@ export default function AdminPanel({
                       />
                     </div>
 
+                    {/* Site Logo Uploader */}
                     <div className="admin-input-field">
-                      <label>Avatar / Photo Image Path or URL</label>
-                      <input 
-                        type="text" 
-                        value={founder.avatar || ''}
-                        onChange={e => handleFounderChange('avatar', e.target.value)}
-                      />
+                      <label>Site Logo (ওয়েবসাইট লোগো)</label>
+                      <div className="admin-image-uploader-box">
+                        <img src={founder.logo || '/assets/logo.png'} alt="Site Logo" className="image-preview-thumb logo" />
+                        <div className="uploader-controls">
+                          <label className="admin-upload-btn">
+                            <Upload size={14} />
+                            <span>{lang === 'bn' ? 'লোগো ফাইল আপলোড' : 'Upload Logo File'}</span>
+                            <input 
+                              type="file" 
+                              accept="image/*"
+                              onChange={e => handleFileUpload(e, dataUrl => handleFounderChange('logo', dataUrl))}
+                              style={{ display: 'none' }}
+                            />
+                          </label>
+                          <input 
+                            type="text" 
+                            placeholder="or Image URL..."
+                            value={founder.logo || ''}
+                            onChange={e => handleFounderChange('logo', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Founder Photo Uploader */}
+                    <div className="admin-input-field">
+                      <label>Founder Avatar Photo (ডেভেলপারের ছবি)</label>
+                      <div className="admin-image-uploader-box">
+                        <img src={founder.avatar || '/assets/shuvo_photo.png'} alt="Founder Photo" className="image-preview-thumb avatar" />
+                        <div className="uploader-controls">
+                          <label className="admin-upload-btn">
+                            <Upload size={14} />
+                            <span>{lang === 'bn' ? 'ছবি ফাইল আপলোড' : 'Upload Photo File'}</span>
+                            <input 
+                              type="file" 
+                              accept="image/*"
+                              onChange={e => handleFileUpload(e, dataUrl => handleFounderChange('avatar', dataUrl))}
+                              style={{ display: 'none' }}
+                            />
+                          </label>
+                          <input 
+                            type="text" 
+                            placeholder="or Image URL..."
+                            value={founder.avatar || ''}
+                            onChange={e => handleFounderChange('avatar', e.target.value)}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -900,6 +950,58 @@ export default function AdminPanel({
                   />
                 </div>
 
+                {/* App Icon Upload System */}
+                <div className="admin-input-field">
+                  <label>App Icon (অ্যাপের আইকন লোগো)</label>
+                  <div className="admin-image-uploader-box">
+                    <img src={appFormData.icon} alt="App Icon Preview" className="image-preview-thumb app-icon" />
+                    <div className="uploader-controls">
+                      <label className="admin-upload-btn">
+                        <Upload size={14} />
+                        <span>{lang === 'bn' ? 'আইকন ফাইল আপলোড' : 'Upload Icon File'}</span>
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={e => handleFileUpload(e, dataUrl => setAppFormData({ ...appFormData, icon: dataUrl }))}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                      <input 
+                        type="text" 
+                        placeholder="or Image URL..."
+                        value={appFormData.icon}
+                        onChange={e => setAppFormData({ ...appFormData, icon: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* App Banner Upload System */}
+                <div className="admin-input-field">
+                  <label>App Banner (অ্যাপের ব্যানার/কভার)</label>
+                  <div className="admin-image-uploader-box">
+                    <img src={appFormData.banner || appFormData.icon} alt="App Banner Preview" className="image-preview-thumb banner" />
+                    <div className="uploader-controls">
+                      <label className="admin-upload-btn">
+                        <Upload size={14} />
+                        <span>{lang === 'bn' ? 'ব্যানার ফাইল আপলোড' : 'Upload Banner File'}</span>
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={e => handleFileUpload(e, dataUrl => setAppFormData({ ...appFormData, banner: dataUrl }))}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                      <input 
+                        type="text" 
+                        placeholder="or Banner URL..."
+                        value={appFormData.banner || ''}
+                        onChange={e => setAppFormData({ ...appFormData, banner: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="admin-input-field">
                   <label>Rating (রেটিং)</label>
                   <input 
@@ -933,15 +1035,6 @@ export default function AdminPanel({
                     type="text" 
                     value={appFormData.size}
                     onChange={e => setAppFormData({ ...appFormData, size: e.target.value })}
-                  />
-                </div>
-
-                <div className="admin-input-field">
-                  <label>Icon Image Path / URL</label>
-                  <input 
-                    type="text" 
-                    value={appFormData.icon}
-                    onChange={e => setAppFormData({ ...appFormData, icon: e.target.value })}
                   />
                 </div>
 

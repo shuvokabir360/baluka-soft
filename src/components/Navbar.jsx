@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { Sparkles, Moon, Sun, Languages, Search, Smartphone, User, Mail, UserCheck, Send, MessageCircle, Settings, ShieldCheck } from 'lucide-react';
 
-export default function Navbar({ lang, setLang, theme, setTheme, onOpenJoinTester, onOpenAdminPanel }) {
+export default function Navbar({ founder, lang, setLang, theme, setTheme, onOpenJoinTester, onOpenAdminPanel }) {
   const [searchQuery, setSearchQuery] = useState('');
+
+  const siteLogo = founder?.logo || '/assets/logo.png';
 
   return (
     <header className="play-navbar">
       {/* Top Header Row: Logo + Language & Theme & Admin Action Controls */}
       <div className="play-navbar-top">
         <a href="#home" className="play-logo-box">
-          <img src="/assets/logo.png" alt="Baluka Soft Logo" className="play-header-logo" />
+          <img src={siteLogo} alt="Baluka Soft Logo" className="play-header-logo" />
           <div className="play-brand-title">
             <span className="play-title-main">Baluka <span className="green-accent">Soft</span></span>
             <span className="play-subtitle">{lang === 'bn' ? 'অফিশিয়াল অ্যাপ স্টোর' : 'Official App Studio'}</span>

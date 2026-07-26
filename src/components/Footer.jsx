@@ -11,7 +11,7 @@ export default function Footer({ founder, siteSettings, lang, t, onOpenAdminPane
       <div className="play-footer-top">
         <div className="play-footer-brand-col">
           <div className="play-footer-logo-row">
-            <img src="/assets/logo.png" alt="Baluka Soft Logo" className="play-footer-logo" />
+            <img src={founder?.logo || '/assets/logo.png'} alt="Baluka Soft Logo" className="play-footer-logo" />
             <div>
               <h3 className="play-footer-title">Baluka <span className="green-accent">Soft</span></h3>
               <p className="play-footer-sub">Official Android App Studio & Beta Portal</p>

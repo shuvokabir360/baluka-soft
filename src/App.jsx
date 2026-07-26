@@ -144,6 +144,7 @@ export default function App() {
         <main className="mobile-app-body">
           {/* Header Navbar inside scroll container */}
           <Navbar 
+            founder={founder}
             lang={lang} 
             setLang={setLang} 
             theme={theme} 
