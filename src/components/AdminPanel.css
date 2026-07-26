@@ -843,5 +843,212 @@
   transform: translateY(-1px);
 }
 
+/* Inbox & Messages Subtab Pills */
+.inbox-subtab-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subtab-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.subtab-pill:hover,
+.subtab-pill.active {
+  background: rgba(0, 230, 118, 0.15);
+  color: #00e676;
+  border-color: rgba(0, 230, 118, 0.4);
+}
+
+.tab-unread-badge {
+  background: #ff5252;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: 4px;
+}
+
+.pill-unread-dot {
+  width: 8px;
+  height: 8px;
+  background: #ff5252;
+  border-radius: 50%;
+}
+
+/* Contact Message Card */
+.contact-messages-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contact-msg-card {
+  background: rgba(12, 20, 33, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: all 0.2s;
+}
+
+.contact-msg-card.unread {
+  border-left: 4px solid #00e676;
+  background: rgba(0, 230, 118, 0.04);
+}
+
+.contact-msg-card.replied {
+  border-left: 4px solid #38bdf8;
+  opacity: 0.85;
+}
+
+.msg-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.msg-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.msg-avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00e676, #00b0ff);
+  color: #000;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+}
+
+.msg-user-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.msg-user-email {
+  font-size: 0.8rem;
+  color: #00e676;
+  text-decoration: none;
+}
+
+.msg-card-meta-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.msg-date-tag {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.msg-status-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.msg-status-badge.unread {
+  background: rgba(0, 230, 118, 0.2);
+  color: #00e676;
+}
+
+.msg-status-badge.replied {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+}
+
+.msg-text-content {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.msg-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-btn-reply-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(0, 230, 118, 0.2), rgba(0, 176, 255, 0.18));
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.4);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-btn-reply-email:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+.admin-btn-reply-email-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 230, 118, 0.15);
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.3);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-btn-reply-email-sm:hover {
+  background: rgba(0, 230, 118, 0.3);
+}
+
+.admin-btn-delete-sm {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-btn-delete-sm:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+
 
 

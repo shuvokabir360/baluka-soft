@@ -65,6 +65,30 @@ export default function App() {
     }
   });
 
+  const [contactMessages, setContactMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem('baluka_soft_contact_messages');
+      return saved ? JSON.parse(saved) : [
+        {
+          id: 'msg-1',
+          name: 'Tanvir Hossain',
+          email: 'tanvir.dev@gmail.com',
+          message: 'আপনার মানি ম্যানেজ প্রো অ্যাপটির জন্য একটি কাস্টম এক্সপোর্ট ফিচার যোগ করা যাবে কি?',
+          date: '26/07/2026 23:45',
+          status: 'unread'
+        }
+      ];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  const handleAddNewMessage = (newMsg) => {
+    const updated = [newMsg, ...contactMessages];
+    setContactMessages(updated);
+    localStorage.setItem('baluka_soft_contact_messages', JSON.stringify(updated));
+  };
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
@@ -179,6 +203,7 @@ export default function App() {
             siteSettings={siteSettings}
             lang={lang} 
             t={t} 
+            onSendMessage={handleAddNewMessage}
           />
           <Footer 
             founder={founder}
@@ -230,6 +255,8 @@ export default function App() {
         setSiteSettings={setSiteSettings}
         testers={testers}
         setTesters={setTesters}
+        contactMessages={contactMessages}
+        setContactMessages={setContactMessages}
         lang={lang}
       />
     </div>

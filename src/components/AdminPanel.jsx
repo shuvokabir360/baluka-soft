@@ -3,7 +3,8 @@ import {
   X, Plus, Edit3, Trash2, Save, Download, Upload, RotateCcw, 
   ShieldCheck, Lock, Smartphone, User, Settings, Mail, Globe, 
   Code2, Sparkles, Key, CheckCircle2, Layers, Sliders, Database,
-  Eye, EyeOff, AlertTriangle, ArrowRight, ExternalLink, Image as ImageIcon
+  Eye, EyeOff, AlertTriangle, ArrowRight, ExternalLink, Image as ImageIcon,
+  MessageSquare, Send, Reply, Check
 } from 'lucide-react';
 import { appsData as initialAppsData, founderDetails as initialFounderDetails, defaultSiteSettings } from '../data/appsData';
 import './AdminPanel.css';
@@ -19,6 +20,8 @@ export default function AdminPanel({
   setSiteSettings,
   testers,
   setTesters,
+  contactMessages = [],
+  setContactMessages,
   lang
 }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -28,6 +31,7 @@ export default function AdminPanel({
   
   // Active Tab: 'apps' | 'founder' | 'site' | 'testers' | 'backup'
   const [activeTab, setActiveTab] = useState('apps');
+  const [inboxSubTab, setInboxSubTab] = useState('messages'); // 'messages' | 'testers'
 
   // App Editor Modal State
   const [editingApp, setEditingApp] = useState(null); // null when not editing/adding
@@ -216,7 +220,40 @@ export default function AdminPanel({
     localStorage.setItem('baluka_soft_site_settings', JSON.stringify(updated));
   };
 
+  // --- Contact Messages Handlers ---
+  const handleReplyToContactMessage = (msg) => {
+    const mailSubject = encodeURIComponent(`Re: Inquiry from Baluka Soft`);
+    const mailBody = encodeURIComponent(`Hi ${msg.name},\n\nThank you for reaching out to Baluka Soft!\n\nRegarding your message:\n"${msg.message}"\n\n---\nBest regards,\nKabir Hossen Shuvo\nFounder & Lead Developer, Baluka Soft\n${siteSettings?.supportEmail || 'contact@balukasoft.com'}`);
+    
+    // Open Mail Client
+    window.location.href = `mailto:${msg.email}?subject=${mailSubject}&body=${mailBody}`;
+
+    // Mark message as replied
+    const updated = contactMessages.map(m => m.id === msg.id ? { ...m, status: 'replied' } : m);
+    setContactMessages(updated);
+    localStorage.setItem('baluka_soft_contact_messages', JSON.stringify(updated));
+    showToast(lang === 'bn' ? 'ইমেইল ক্লায়েন্ট খোলা হচ্ছে... ✉️' : 'Opening Email Client... ✉️');
+  };
+
+  const handleDeleteContactMessage = (id) => {
+    if (window.confirm(lang === 'bn' ? 'আপনি কি নিশ্চিত যে এই মেসেজটি মুছে ফেলতে চান?' : 'Are you sure you want to delete this message?')) {
+      const updated = contactMessages.filter(m => m.id !== id);
+      setContactMessages(updated);
+      localStorage.setItem('baluka_soft_contact_messages', JSON.stringify(updated));
+      showToast(lang === 'bn' ? 'মেসেজ ডিলিট করা হয়েছে! 🗑️' : 'Message deleted! 🗑️');
+    }
+  };
+
   // --- Beta Testers Handlers ---
+  const handleReplyToTester = (t) => {
+    const targetApp = t.appName || 'Money Manage Pro';
+    const mailSubject = encodeURIComponent(`Google Play Internal Testing Invitation - Baluka Soft`);
+    const mailBody = encodeURIComponent(`Hi ${t.name},\n\nThank you for applying to join the Google Play Internal Beta Testing program for "${targetApp}"!\n\nYour Google Play email (${t.email}) has been added to our authorized tester list.\n\nClick the link below to accept the testing invitation and download the app directly from Google Play Store:\nhttps://play.google.com/apps/internaltest/4701488665356819853\n\nBest regards,\nBaluka Soft Team`);
+
+    window.location.href = `mailto:${t.email}?subject=${mailSubject}&body=${mailBody}`;
+    showToast(lang === 'bn' ? 'টেস্টার ইনভাইট মেইল ক্লায়েন্ট খোলা হচ্ছে... ✉️' : 'Opening email invitation to tester... ✉️');
+  };
+
   const handleAddManualTester = (e) => {
     e.preventDefault();
     const name = e.target.testerName.value;
@@ -227,7 +264,7 @@ export default function AdminPanel({
     if (!name || !email) return;
 
     const newTester = {
-      id: Date.now(),
+      id: Date.now().toString(),
       name,
       email,
       os: os || 'Android',
@@ -269,7 +306,8 @@ export default function AdminPanel({
       appsList,
       founder,
       siteSettings,
-      testers
+      testers,
+      contactMessages
     };
     const jsonStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(backupData, null, 2));
     const link = document.createElement('a');
@@ -302,6 +340,10 @@ export default function AdminPanel({
           setTesters(imported.testers);
           localStorage.setItem('baluka_soft_beta_testers', JSON.stringify(imported.testers));
         }
+        if (imported.contactMessages) {
+          setContactMessages(imported.contactMessages);
+          localStorage.setItem('baluka_soft_contact_messages', JSON.stringify(imported.contactMessages));
+        }
         showToast(lang === 'bn' ? 'ব্যাকআপ ডাটা সফলভাবে রিস্টোর হয়েছে! 🎉' : 'Backup restored successfully! 🎉');
       } catch (err) {
         alert('Invalid JSON File Format');
@@ -316,14 +358,18 @@ export default function AdminPanel({
       localStorage.removeItem('baluka_soft_founder');
       localStorage.removeItem('baluka_soft_site_settings');
       localStorage.removeItem('baluka_soft_beta_testers');
+      localStorage.removeItem('baluka_soft_contact_messages');
 
       setAppsList(initialAppsData);
       setFounder(initialFounderDetails);
       setSiteSettings(defaultSiteSettings);
       setTesters([]);
+      setContactMessages([]);
       showToast(lang === 'bn' ? 'সকল ডাটা অরিজিনাল ডাটায় রিস্টোর করা হয়েছে! 🔄' : 'Reset to default data completed! 🔄');
     }
   };
+
+  const unreadMessagesCount = contactMessages.filter(m => m.status === 'unread').length;
 
   return (
     <div className="admin-modal-overlay" onClick={onClose}>
@@ -343,7 +389,7 @@ export default function AdminPanel({
             <div>
               <h2>Baluka Soft Admin Control Panel</h2>
               <p className="admin-subtext">
-                {lang === 'bn' ? 'ফ্রন্টএন্ডের সকল কনটেন্ট ও লোগো লাইভ আপডেট, এডিট ও যোগ করুন' : 'Real-time Content Management & Frontend Control Center'}
+                {lang === 'bn' ? 'ফ্রন্টএন্ডের সকল কনটেন্ট, ইমেইল ইনবক্স ও বিটা টেস্টার পরিচালনা করুন' : 'Real-time Content Management & Frontend Control Center'}
               </p>
             </div>
           </div>
@@ -435,8 +481,11 @@ export default function AdminPanel({
                 className={`admin-tab-btn ${activeTab === 'testers' ? 'active' : ''}`}
                 onClick={() => setActiveTab('testers')}
               >
-                <Database size={17} />
-                <span>{lang === 'bn' ? 'বিটা টেস্টার সমূহের তথ্য (' + testers.length + ')' : 'Beta Testers (' + testers.length + ')'}</span>
+                <MessageSquare size={17} />
+                <span>
+                  {lang === 'bn' ? 'ইনবক্স ও টেস্টার' : 'Inbox & Testers'}
+                  {unreadMessagesCount > 0 && <span className="tab-unread-badge">{unreadMessagesCount}</span>}
+                </span>
               </button>
 
               <button 
@@ -776,82 +825,180 @@ export default function AdminPanel({
               </div>
             )}
 
-            {/* TAB 4: BETA TESTERS DATABASE */}
+            {/* TAB 4: INBOX MESSAGES & BETA TESTERS DATABASE */}
             {activeTab === 'testers' && (
               <div className="admin-tab-content">
                 <div className="tab-actions-header">
                   <div>
-                    <h3>{lang === 'bn' ? 'ইন্টারনাল বিটা টেস্টার ডাটাবেজ' : 'Beta Testers Submissions'}</h3>
-                    <p className="subtext">{lang === 'bn' ? 'ইউজারদের আবেদনকৃত বিটা টেস্টার ইমেইল ও ডিভাইস তালিকা' : 'Manage submitted emails for Google Play Internal Testing'}</p>
+                    <h3>{lang === 'bn' ? 'ইমেইল ইনবক্স বার্তা ও বিটা টেস্টার সমুহ' : 'Inbox Messages & Beta Testers'}</h3>
+                    <p className="subtext">{lang === 'bn' ? 'ইউজারদের পাঠানো বার্তা দেখুন এবং এক ক্লিকে সরাসরি ইমেইল রিপ্লাই দিন' : 'View contact messages and beta tester emails with direct reply'}</p>
                   </div>
-                  <button className="admin-btn-primary" onClick={handleExportCSV} disabled={testers.length === 0}>
-                    <Download size={16} />
-                    <span>{lang === 'bn' ? 'সিএসভি ডাউনলোড (Export CSV)' : 'Export CSV'}</span>
-                  </button>
-                </div>
 
-                {/* Add Manual Tester Box */}
-                <div className="admin-card-section mb-4">
-                  <h4>➕ Add Manual Beta Tester (ম্যানুয়ালি টেস্টার যোগ করুন)</h4>
-                  <form onSubmit={handleAddManualTester} className="manual-tester-inline-form">
-                    <input type="text" name="testerName" placeholder="Full Name" required />
-                    <input type="email" name="testerEmail" placeholder="Google Play Email" required />
-                    <select name="testerOs" defaultValue="Android">
-                      <option value="Android">Android</option>
-                      <option value="Windows">Windows</option>
-                      <option value="iOS">iOS</option>
-                    </select>
-                    <input type="text" name="testerApp" placeholder="Target App" defaultValue="Money Manage Pro" />
-                    <button type="submit" className="admin-btn-success">
-                      <Plus size={16} /> Add Tester
+                  {/* Sub-tab pills */}
+                  <div className="inbox-subtab-pills">
+                    <button 
+                      className={`subtab-pill ${inboxSubTab === 'messages' ? 'active' : ''}`}
+                      onClick={() => setInboxSubTab('messages')}
+                    >
+                      <Mail size={15} />
+                      <span>{lang === 'bn' ? 'কন্টাক্ট বার্তা (' + contactMessages.length + ')' : 'Messages (' + contactMessages.length + ')'}</span>
+                      {unreadMessagesCount > 0 && <span className="pill-unread-dot"></span>}
                     </button>
-                  </form>
+
+                    <button 
+                      className={`subtab-pill ${inboxSubTab === 'testers' ? 'active' : ''}`}
+                      onClick={() => setInboxSubTab('testers')}
+                    >
+                      <User size={15} />
+                      <span>{lang === 'bn' ? 'বিটা টেস্টার সমুহ (' + testers.length + ')' : 'Beta Testers (' + testers.length + ')'}</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Table */}
-                <div className="admin-table-wrapper">
-                  {testers.length === 0 ? (
-                    <div className="empty-state py-4 text-center">
-                      <Mail size={40} className="muted-icon mx-auto mb-2" />
-                      <p>{lang === 'bn' ? 'কোনো বিটা টেস্টারের আবেদন পাওয়া যায়নি।' : 'No beta tester submissions found.'}</p>
-                    </div>
-                  ) : (
-                    <table className="admin-table">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Name</th>
-                          <th>Email</th>
-                          <th>OS</th>
-                          <th>Target App</th>
-                          <th>Date</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {testers.map((t, idx) => (
-                          <tr key={t.id || idx}>
-                            <td>{idx + 1}</td>
-                            <td>{t.name}</td>
-                            <td className="highlight-email">{t.email}</td>
-                            <td><span className="badge-os">{t.os}</span></td>
-                            <td>{t.appName}</td>
-                            <td>{t.date}</td>
-                            <td>
+                {/* SUB TAB 1: CONTACT MESSAGES */}
+                {inboxSubTab === 'messages' && (
+                  <div className="messages-inbox-wrapper">
+                    {contactMessages.length === 0 ? (
+                      <div className="empty-state py-4 text-center">
+                        <Mail size={40} className="muted-icon mx-auto mb-2" />
+                        <p>{lang === 'bn' ? 'কোনো বার্তা পাওয়া যায়নি।' : 'No contact messages found.'}</p>
+                      </div>
+                    ) : (
+                      <div className="contact-messages-cards-list">
+                        {contactMessages.map((msg) => (
+                          <div className={`contact-msg-card ${msg.status || 'unread'}`} key={msg.id}>
+                            <div className="msg-card-top">
+                              <div className="msg-user-info">
+                                <div className="msg-avatar-circle">
+                                  {msg.name?.charAt(0)?.toUpperCase() || 'U'}
+                                </div>
+                                <div>
+                                  <h4 className="msg-user-name">{msg.name}</h4>
+                                  <a href={`mailto:${msg.email}`} className="msg-user-email">{msg.email}</a>
+                                </div>
+                              </div>
+
+                              <div className="msg-card-meta-right">
+                                <span className="msg-date-tag">{msg.date}</span>
+                                {msg.status === 'replied' ? (
+                                  <span className="msg-status-badge replied"><Check size={12} /> Replied</span>
+                                ) : (
+                                  <span className="msg-status-badge unread">Unread</span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="msg-card-body mt-2">
+                              <p className="msg-text-content">"{msg.message}"</p>
+                            </div>
+
+                            <div className="msg-card-footer mt-3">
                               <button 
-                                className="admin-btn-sm-danger"
-                                onClick={() => handleDeleteTester(t.id)}
-                                title="Delete tester"
+                                className="admin-btn-reply-email"
+                                onClick={() => handleReplyToContactMessage(msg)}
+                              >
+                                <Reply size={15} />
+                                <span>{lang === 'bn' ? '✉️ সরাসরি ইমেইলে রিপ্লাই দিন' : '✉️ Reply via Email'}</span>
+                              </button>
+
+                              <button 
+                                className="admin-btn-delete-sm"
+                                onClick={() => handleDeleteContactMessage(msg.id)}
                               >
                                 <Trash2 size={14} />
                               </button>
-                            </td>
-                          </tr>
+                            </div>
+                          </div>
                         ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* SUB TAB 2: BETA TESTERS DATABASE */}
+                {inboxSubTab === 'testers' && (
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4>📱 Registered Beta Testers List</h4>
+                      <button className="admin-btn-primary" onClick={handleExportCSV} disabled={testers.length === 0}>
+                        <Download size={15} />
+                        <span>{lang === 'bn' ? 'সিএসভি ডাউনলোড (Export CSV)' : 'Export CSV'}</span>
+                      </button>
+                    </div>
+
+                    {/* Add Manual Tester Box */}
+                    <div className="admin-card-section mb-4">
+                      <h4>➕ Add Manual Beta Tester (ম্যানুয়ালি টেস্টার যোগ করুন)</h4>
+                      <form onSubmit={handleAddManualTester} className="manual-tester-inline-form">
+                        <input type="text" name="testerName" placeholder="Full Name" required />
+                        <input type="email" name="testerEmail" placeholder="Google Play Email" required />
+                        <select name="testerOs" defaultValue="Android">
+                          <option value="Android">Android</option>
+                          <option value="Windows">Windows</option>
+                          <option value="iOS">iOS</option>
+                        </select>
+                        <input type="text" name="testerApp" placeholder="Target App" defaultValue="Money Manage Pro" />
+                        <button type="submit" className="admin-btn-success">
+                          <Plus size={16} /> Add Tester
+                        </button>
+                      </form>
+                    </div>
+
+                    {/* Table */}
+                    <div className="admin-table-wrapper">
+                      {testers.length === 0 ? (
+                        <div className="empty-state py-4 text-center">
+                          <Mail size={40} className="muted-icon mx-auto mb-2" />
+                          <p>{lang === 'bn' ? 'কোনো বিটা টেস্টারের আবেদন পাওয়া যায়নি।' : 'No beta tester submissions found.'}</p>
+                        </div>
+                      ) : (
+                        <table className="admin-table">
+                          <thead>
+                            <tr>
+                              <th>#</th>
+                              <th>Name</th>
+                              <th>Email</th>
+                              <th>Target App</th>
+                              <th>Date</th>
+                              <th>Action / Reply</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {testers.map((t, idx) => (
+                              <tr key={t.id || idx}>
+                                <td>{idx + 1}</td>
+                                <td><strong>{t.name}</strong></td>
+                                <td className="highlight-email">{t.email}</td>
+                                <td>{t.appName}</td>
+                                <td>{t.date}</td>
+                                <td>
+                                  <div className="flex items-center gap-2">
+                                    <button 
+                                      className="admin-btn-reply-email-sm"
+                                      onClick={() => handleReplyToTester(t)}
+                                      title="Send Play Store Invite Email"
+                                    >
+                                      <Send size={13} />
+                                      <span>{lang === 'bn' ? 'ইনভাইট মেইল' : 'Send Invite'}</span>
+                                    </button>
+                                    <button 
+                                      className="admin-btn-sm-danger"
+                                      onClick={() => handleDeleteTester(t.id)}
+                                      title="Delete tester"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  </div>
+                )}
+
               </div>
             )}
 

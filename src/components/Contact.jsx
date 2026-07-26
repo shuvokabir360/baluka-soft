@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Send, MapPin, CheckCircle2 } from 'lucide-react';
 
-export default function Contact({ siteSettings, lang, t }) {
+export default function Contact({ siteSettings, lang, t, onSendMessage }) {
   const [sent, setSent] = useState(false);
   const [contactData, setContactData] = useState({ name: '', email: '', message: '' });
 
@@ -11,6 +11,18 @@ export default function Contact({ siteSettings, lang, t }) {
   const handleContactSubmit = (e) => {
     e.preventDefault();
     if (!contactData.email || !contactData.name || !contactData.message) return;
+
+    if (onSendMessage) {
+      onSendMessage({
+        id: Date.now().toString(),
+        name: contactData.name,
+        email: contactData.email,
+        message: contactData.message,
+        date: new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'unread'
+      });
+    }
+
     setSent(true);
   };
 
