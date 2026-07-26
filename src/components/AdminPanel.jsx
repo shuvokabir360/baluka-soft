@@ -4,7 +4,7 @@ import {
   ShieldCheck, Lock, Smartphone, User, Settings, Mail, Globe, 
   Code2, Sparkles, Key, CheckCircle2, Layers, Sliders, Database,
   Eye, EyeOff, AlertTriangle, ArrowRight, ExternalLink, Image as ImageIcon,
-  MessageSquare, Send, Reply, Check
+  MessageSquare, Send, Reply, Check, LayoutDashboard, ChevronLeft, Menu
 } from 'lucide-react';
 import { appsData as initialAppsData, founderDetails as initialFounderDetails, defaultSiteSettings } from '../data/appsData';
 import './AdminPanel.css';
@@ -28,6 +28,7 @@ export default function AdminPanel({
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   
   // Active Tab: 'apps' | 'founder' | 'site' | 'testers' | 'backup'
   const [activeTab, setActiveTab] = useState('apps');
@@ -101,7 +102,7 @@ export default function AdminPanel({
     };
   }
 
-  // --- Image Upload Helper (Converts File -> Base64 Data URL) ---
+  // --- Image Upload Helper ---
   const handleFileUpload = (e, callback) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -153,7 +154,6 @@ export default function AdminPanel({
     let updatedApps = [...appsList];
 
     if (appFormData.isFeaturedBeta) {
-      // Unset featured flag from other apps if this one is featured
       updatedApps = updatedApps.map(a => ({ ...a, isFeaturedBeta: false }));
     }
 
@@ -225,10 +225,8 @@ export default function AdminPanel({
     const mailSubject = encodeURIComponent(`Re: Inquiry from Baluka Soft`);
     const mailBody = encodeURIComponent(`Hi ${msg.name},\n\nThank you for reaching out to Baluka Soft!\n\nRegarding your message:\n"${msg.message}"\n\n---\nBest regards,\nKabir Hossen Shuvo\nFounder & Lead Developer, Baluka Soft\n${siteSettings?.supportEmail || 'contact@balukasoft.com'}`);
     
-    // Open Mail Client
     window.location.href = `mailto:${msg.email}?subject=${mailSubject}&body=${mailBody}`;
 
-    // Mark message as replied
     const updated = contactMessages.map(m => m.id === msg.id ? { ...m, status: 'replied' } : m);
     setContactMessages(updated);
     localStorage.setItem('baluka_soft_contact_messages', JSON.stringify(updated));
@@ -372,753 +370,841 @@ export default function AdminPanel({
   const unreadMessagesCount = contactMessages.filter(m => m.status === 'unread').length;
 
   return (
-    <div className="admin-modal-overlay" onClick={onClose}>
-      <div className="admin-panel-container" onClick={e => e.stopPropagation()}>
-        
-        {/* Top Floating Notification Toast */}
-        {toastMsg && (
-          <div className="admin-toast-banner">
-            <span>{toastMsg}</span>
-          </div>
-        )}
-
-        {/* Header Bar */}
-        <div className="admin-panel-header">
-          <div className="admin-header-title">
-            <ShieldCheck size={26} className="green-accent-icon" />
-            <div>
-              <h2>Baluka Soft Admin Control Panel</h2>
-              <p className="admin-subtext">
-                {lang === 'bn' ? 'ফ্রন্টএন্ডের সকল কনটেন্ট, ইমেইল ইনবক্স ও বিটা টেস্টার পরিচালনা করুন' : 'Real-time Content Management & Frontend Control Center'}
-              </p>
-            </div>
-          </div>
-
-          <div className="admin-header-controls">
-            {isAuthenticated && (
-              <button className="admin-btn-logout" onClick={() => setIsAuthenticated(false)}>
-                <Lock size={15} />
-                <span>{lang === 'bn' ? 'লক করুন' : 'Lock Panel'}</span>
-              </button>
-            )}
-            <button className="admin-close-btn" onClick={onClose} title="Close Admin Panel">
-              <X size={20} />
-            </button>
-          </div>
+    <div className="wp-admin-page-overlay">
+      {/* Top Floating Notification Toast */}
+      {toastMsg && (
+        <div className="admin-toast-banner">
+          <span>{toastMsg}</span>
         </div>
+      )}
 
-        {/* If Not Authenticated -> Show Password Login Gate */}
-        {!isAuthenticated ? (
-          <div className="admin-login-wrapper">
-            <div className="admin-login-card">
-              <div className="login-icon-circle">
-                <Lock size={32} className="green-accent-icon" />
+      {!isAuthenticated ? (
+        /* Full Page WordPress Style Login Gate */
+        <div className="wp-login-page-container">
+          <div className="admin-login-card wp-login-card">
+            <div className="login-icon-circle">
+              <ShieldCheck size={36} className="green-accent-icon" />
+            </div>
+            <h2>Baluka Soft Dashboard</h2>
+            <p className="login-subtext">
+              {lang === 'bn' ? 'অ্যাডমিন ড্যাশবোর্ডে প্রবেশ করতে সিকিউরিটি পাসওয়ার্ডটি লিখুন' : 'Enter Admin Password to access WordPress Dashboard'}
+            </p>
+
+            <form onSubmit={handleLogin} className="admin-login-form">
+              <div className="admin-password-box">
+                <Key size={18} className="input-prefix-icon" />
+                <input 
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder={lang === 'bn' ? 'পাসওয়ার্ড লিখুন...' : 'Enter password...'}
+                  value={passwordInput}
+                  onChange={e => setPasswordInput(e.target.value)}
+                  autoFocus
+                />
+                <button 
+                  type="button" 
+                  className="pwd-toggle-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
-              <h3>{lang === 'bn' ? 'অ্যাডমিন সিকিউরিটি অ্যাক্সেস' : 'Admin Portal Authentication'}</h3>
-              <p className="login-subtext">
-                {lang === 'bn' ? 'অ্যাডমিন প্যানেলে প্রবেশ করতে সিকিউরিটি পাসওয়ার্ডটি লিখুন (ডিফল্ট: admin)' : 'Enter Admin Password to access panel (Default: admin)'}
-              </p>
 
-              <form onSubmit={handleLogin} className="admin-login-form">
-                <div className="admin-password-box">
-                  <Key size={18} className="input-prefix-icon" />
-                  <input 
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder={lang === 'bn' ? 'পাসওয়ার্ড লিখুন...' : 'Enter password...'}
-                    value={passwordInput}
-                    onChange={e => setPasswordInput(e.target.value)}
-                    autoFocus
-                  />
-                  <button 
-                    type="button" 
-                    className="pwd-toggle-btn"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
+              {authError && <div className="admin-error-alert">{authError}</div>}
 
-                {authError && <div className="admin-error-alert">{authError}</div>}
+              <div className="wp-login-actions mt-3">
+                <button type="button" className="wp-btn-back-site" onClick={onClose}>
+                  <Globe size={16} />
+                  <span>{lang === 'bn' ? 'ওয়েবসাইটে ফিরে যান' : 'Back to Website'}</span>
+                </button>
 
-                <button type="submit" className="admin-btn-primary full-width mt-3">
-                  <span>{lang === 'bn' ? 'অ্যাডমিন প্যানেল খুলুন' : 'Unlock Control Panel'}</span>
+                <button type="submit" className="admin-btn-primary flex-1">
+                  <span>{lang === 'bn' ? 'ড্যাশবোর্ড আনলক' : 'Log In to Dashboard'}</span>
                   <ArrowRight size={18} />
                 </button>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
-        ) : (
-          /* Authenticated -> Show Full Admin Panel Tabs & Editors */
-          <div className="admin-panel-body">
-            
-            {/* Admin Tabs Navigation Bar */}
-            <div className="admin-tabs-bar">
+        </div>
+      ) : (
+        /* Authenticated -> Full Page WordPress Admin Dashboard Layout */
+        <div className="wp-admin-layout">
+          
+          {/* WordPress Dark Sidebar */}
+          <aside className={`wp-admin-sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+            <div className="wp-sidebar-header">
+              <img src={founder?.logo || '/assets/logo.png'} alt="Logo" className="wp-sidebar-logo" />
+              <div className="wp-sidebar-brand-text">
+                <h3>Baluka Soft</h3>
+                <span className="wp-version-tag">Admin v2.5</span>
+              </div>
+            </div>
+
+            <nav className="wp-sidebar-nav">
+              <div className="wp-nav-section-label">Main Navigation</div>
+
               <button 
-                className={`admin-tab-btn ${activeTab === 'apps' ? 'active' : ''}`}
+                className={`wp-sidebar-item ${activeTab === 'apps' ? 'active' : ''}`}
                 onClick={() => setActiveTab('apps')}
               >
-                <Smartphone size={17} />
-                <span>{lang === 'bn' ? 'অ্যাপস ম্যানেজমেন্ট (' + appsList.length + ')' : 'Apps Manager (' + appsList.length + ')'}</span>
+                <Smartphone size={18} />
+                <span>{lang === 'bn' ? 'অ্যাপস ম্যানেজমেন্ট' : 'Apps Catalog'}</span>
+                <span className="wp-pill-count">{appsList.length}</span>
               </button>
 
               <button 
-                className={`admin-tab-btn ${activeTab === 'founder' ? 'active' : ''}`}
+                className={`wp-sidebar-item ${activeTab === 'founder' ? 'active' : ''}`}
                 onClick={() => setActiveTab('founder')}
               >
-                <User size={17} />
+                <User size={18} />
                 <span>{lang === 'bn' ? 'প্রতিষ্ঠাতা ও প্রোফাইল' : 'Founder & Studio'}</span>
               </button>
 
               <button 
-                className={`admin-tab-btn ${activeTab === 'site' ? 'active' : ''}`}
+                className={`wp-sidebar-item ${activeTab === 'site' ? 'active' : ''}`}
                 onClick={() => setActiveTab('site')}
               >
-                <Sliders size={17} />
+                <Sliders size={18} />
                 <span>{lang === 'bn' ? 'হিরো ও সাইট সেটিংস' : 'Hero & Site Config'}</span>
               </button>
 
               <button 
-                className={`admin-tab-btn ${activeTab === 'testers' ? 'active' : ''}`}
+                className={`wp-sidebar-item ${activeTab === 'testers' ? 'active' : ''}`}
                 onClick={() => setActiveTab('testers')}
               >
-                <MessageSquare size={17} />
-                <span>
-                  {lang === 'bn' ? 'ইনবক্স ও টেস্টার' : 'Inbox & Testers'}
-                  {unreadMessagesCount > 0 && <span className="tab-unread-badge">{unreadMessagesCount}</span>}
-                </span>
+                <MessageSquare size={18} />
+                <span>{lang === 'bn' ? 'ইনবক্স ও টেস্টার' : 'Inbox & Testers'}</span>
+                {unreadMessagesCount > 0 ? (
+                  <span className="wp-unread-badge">{unreadMessagesCount}</span>
+                ) : (
+                  <span className="wp-pill-count">{contactMessages.length}</span>
+                )}
               </button>
 
               <button 
-                className={`admin-tab-btn ${activeTab === 'backup' ? 'active' : ''}`}
+                className={`wp-sidebar-item ${activeTab === 'backup' ? 'active' : ''}`}
                 onClick={() => setActiveTab('backup')}
               >
-                <Settings size={17} />
+                <Settings size={18} />
                 <span>{lang === 'bn' ? 'ব্যাকআপ ও সিস্টেম' : 'Backup & Security'}</span>
               </button>
+            </nav>
+
+            <div className="wp-sidebar-footer">
+              <button className="wp-back-to-site-btn" onClick={onClose}>
+                <Globe size={16} />
+                <span>{lang === 'bn' ? '🌐 মূল ওয়েবসাইটে ফিরে যান' : '🌐 View Main Website'}</span>
+              </button>
             </div>
+          </aside>
 
-            {/* TAB 1: APPS MANAGEMENT */}
-            {activeTab === 'apps' && (
-              <div className="admin-tab-content">
-                <div className="tab-actions-header">
-                  <div>
-                    <h3>{lang === 'bn' ? 'অ্যাপস তালিকা ও তথ্য সম্পাদনা' : 'Android App Catalog Management'}</h3>
-                    <p className="subtext">{lang === 'bn' ? 'আপনার সকল পাবলিশড ও বিটা অ্যাপস যোগ, এডিট বা ডিলিট করুন' : 'Add, modify details, change status, or remove apps'}</p>
-                  </div>
-                  <button className="admin-btn-success" onClick={handleOpenAddApp}>
-                    <Plus size={18} />
-                    <span>{lang === 'bn' ? 'নতুন অ্যাপ যোগ করুন' : 'Add New App'}</span>
-                  </button>
-                </div>
-
-                <div className="admin-apps-list-grid">
-                  {appsList.map((app) => (
-                    <div className="admin-app-item-card" key={app.id}>
-                      <div className="app-card-left">
-                        <img src={app.icon} alt={app.title} className="admin-app-thumb" />
-                        <div className="app-card-meta">
-                          <div className="flex items-center gap-2">
-                            <h4 className="app-card-title">{app.title}</h4>
-                            <span className={`admin-status-badge ${app.status}`}>
-                              {app.status.toUpperCase()}
-                            </span>
-                            {app.isFeaturedBeta && (
-                              <span className="admin-status-badge featured">⭐ Featured Beta</span>
-                            )}
-                          </div>
-                          <p className="app-card-tagline">{app.tagline}</p>
-                          <div className="app-card-subinfo">
-                            <span>Category: <strong>{app.category}</strong></span> • 
-                            <span> Version: <strong>{app.version}</strong></span> • 
-                            <span> Size: <strong>{app.size}</strong></span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="app-card-right-actions">
-                        <button 
-                          className="admin-btn-edit"
-                          onClick={() => handleOpenEditApp(app)}
-                          title="Edit App Details"
-                        >
-                          <Edit3 size={16} />
-                          <span>{lang === 'bn' ? 'এডিট' : 'Edit'}</span>
-                        </button>
-                        <button 
-                          className="admin-btn-delete"
-                          onClick={() => handleDeleteApp(app.id)}
-                          title="Delete App"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+          {/* Main Workspace Content Area */}
+          <div className="wp-admin-main">
+            
+            {/* WordPress Top Admin Bar */}
+            <header className="wp-admin-topbar">
+              <div className="wp-topbar-left">
+                <button 
+                  className="wp-sidebar-toggle-btn"
+                  onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                  title="Toggle Sidebar"
+                >
+                  <Menu size={18} />
+                </button>
+                <div className="wp-breadcrumb">
+                  <span className="wp-crumb-root">Baluka Soft Dashboard</span>
+                  <span className="wp-crumb-sep">/</span>
+                  <span className="wp-crumb-current">
+                    {activeTab === 'apps' && (lang === 'bn' ? 'অ্যাপস ডাটাবেজ' : 'Apps Catalog')}
+                    {activeTab === 'founder' && (lang === 'bn' ? 'প্রতিষ্ঠাতা প্রোফাইল' : 'Founder Profile')}
+                    {activeTab === 'site' && (lang === 'bn' ? 'হিরো সেটিংস' : 'Site Configuration')}
+                    {activeTab === 'testers' && (lang === 'bn' ? 'ইনবক্স বার্তা ও টেস্টার' : 'Inbox & Beta Testers')}
+                    {activeTab === 'backup' && (lang === 'bn' ? 'সিকিউরিটি ও ব্যাকআপ' : 'Security & Backup')}
+                  </span>
                 </div>
               </div>
-            )}
 
-            {/* TAB 2: FOUNDER & STUDIO PROFILE */}
-            {activeTab === 'founder' && (
-              <div className="admin-tab-content">
-                <div className="tab-actions-header">
-                  <div>
-                    <h3>{lang === 'bn' ? 'প্রতিষ্ঠাতা ও স্টুডিও প্রোফাইল এডিটর' : 'Founder & Company Details'}</h3>
-                    <p className="subtext">{lang === 'bn' ? 'ডেভেলপারের তথ্য, বায়ো, ছবি, সাইট লোগো ও স্কিল সেট সমুহ আপডেট করুন' : 'Edit founder info, bios, images, site logo & skills'}</p>
-                  </div>
-                  <button className="admin-btn-primary" onClick={() => showToast('Founder details saved!')}>
-                    <Save size={16} />
-                    <span>{lang === 'bn' ? 'সংরক্ষিত হয়েছে' : 'Saved Live'}</span>
-                  </button>
+              <div className="wp-topbar-right">
+                <button className="wp-topbar-link-btn" onClick={onClose}>
+                  <ExternalLink size={14} />
+                  <span>{lang === 'bn' ? 'সাইট ভিজিট করুন' : 'Visit Site'}</span>
+                </button>
+
+                <div className="wp-user-profile-pill">
+                  <img src={founder?.avatar || '/assets/shuvo_photo.png'} alt="Avatar" className="wp-user-avatar" />
+                  <span className="wp-user-name">{founder?.founderName || 'Kabir Shuvo'}</span>
                 </div>
 
-                <div className="admin-form-grid-2col">
-                  {/* Basic Info */}
-                  <div className="admin-card-section">
-                    <h4>👤 General Details</h4>
-                    <div className="admin-input-field">
-                      <label>Founder Name (নাম)</label>
-                      <input 
-                        type="text" 
-                        value={founder.founderName || ''}
-                        onChange={e => handleFounderChange('founderName', e.target.value)}
-                      />
-                    </div>
+                <button className="wp-logout-btn" onClick={() => setIsAuthenticated(false)} title="Lock Panel">
+                  <Lock size={15} />
+                  <span>{lang === 'bn' ? 'লক করুন' : 'Lock'}</span>
+                </button>
+              </div>
+            </header>
 
-                    <div className="admin-input-field">
-                      <label>Founder Role / Title (পদবী)</label>
-                      <input 
-                        type="text" 
-                        value={founder.founderRole || ''}
-                        onChange={e => handleFounderChange('founderRole', e.target.value)}
-                      />
-                    </div>
+            {/* Workspace Main Body */}
+            <div className="wp-admin-workspace">
 
-                    <div className="admin-input-field">
-                      <label>Company Name (প্রতিষ্ঠানের নাম)</label>
-                      <input 
-                        type="text" 
-                        value={founder.companyName || ''}
-                        onChange={e => handleFounderChange('companyName', e.target.value)}
-                      />
-                    </div>
+              {/* Dashboard Overview Quick Stats Row */}
+              <div className="wp-dashboard-stats-row">
+                <div className="wp-stat-card green">
+                  <div className="stat-card-icon"><Smartphone size={22} /></div>
+                  <div>
+                    <div className="stat-card-val">{appsList.length}</div>
+                    <div className="stat-card-label">{lang === 'bn' ? 'মোট অ্যান্ড্রয়েড অ্যাপস' : 'Total Mobile Apps'}</div>
+                  </div>
+                </div>
 
-                    {/* Site Logo Uploader */}
-                    <div className="admin-input-field">
-                      <label>Site Logo (ওয়েবসাইট লোগো)</label>
-                      <div className="admin-image-uploader-box">
-                        <img src={founder.logo || '/assets/logo.png'} alt="Site Logo" className="image-preview-thumb logo" />
-                        <div className="uploader-controls">
-                          <label className="admin-upload-btn">
-                            <Upload size={14} />
-                            <span>{lang === 'bn' ? 'লোগো ফাইল আপলোড' : 'Upload Logo File'}</span>
-                            <input 
-                              type="file" 
-                              accept="image/*"
-                              onChange={e => handleFileUpload(e, dataUrl => handleFounderChange('logo', dataUrl))}
-                              style={{ display: 'none' }}
-                            />
-                          </label>
-                          <input 
-                            type="text" 
-                            placeholder="or Image URL..."
-                            value={founder.logo || ''}
-                            onChange={e => handleFounderChange('logo', e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Founder Photo Uploader */}
-                    <div className="admin-input-field">
-                      <label>Founder Avatar Photo (ডেভেলপারের ছবি)</label>
-                      <div className="admin-image-uploader-box">
-                        <img src={founder.avatar || '/assets/shuvo_photo.png'} alt="Founder Photo" className="image-preview-thumb avatar" />
-                        <div className="uploader-controls">
-                          <label className="admin-upload-btn">
-                            <Upload size={14} />
-                            <span>{lang === 'bn' ? 'ছবি ফাইল আপলোড' : 'Upload Photo File'}</span>
-                            <input 
-                              type="file" 
-                              accept="image/*"
-                              onChange={e => handleFileUpload(e, dataUrl => handleFounderChange('avatar', dataUrl))}
-                              style={{ display: 'none' }}
-                            />
-                          </label>
-                          <input 
-                            type="text" 
-                            placeholder="or Image URL..."
-                            value={founder.avatar || ''}
-                            onChange={e => handleFounderChange('avatar', e.target.value)}
-                          />
-                        </div>
-                      </div>
+                <div className="wp-stat-card blue">
+                  <div className="stat-card-icon"><MessageSquare size={22} /></div>
+                  <div>
+                    <div className="stat-card-val">{contactMessages.length}</div>
+                    <div className="stat-card-label">
+                      {lang === 'bn' ? 'ইনবক্স মেসেজ' : 'Inbox Messages'} 
+                      {unreadMessagesCount > 0 && <strong className="text-danger"> ({unreadMessagesCount} Unread)</strong>}
                     </div>
                   </div>
+                </div>
 
-                  {/* Bios */}
-                  <div className="admin-card-section">
-                    <h4>📝 Founder Bio & Taglines</h4>
-                    <div className="admin-input-field">
-                      <label>Bangla Bio (বাংলা বায়ো)</label>
-                      <textarea 
-                        rows="3"
-                        value={founder.bioBn || ''}
-                        onChange={e => handleFounderChange('bioBn', e.target.value)}
-                      ></textarea>
-                    </div>
+                <div className="wp-stat-card orange">
+                  <div className="stat-card-icon"><User size={22} /></div>
+                  <div>
+                    <div className="stat-card-val">{testers.length}</div>
+                    <div className="stat-card-label">{lang === 'bn' ? 'নিবন্ধিত বিটা টেস্টার' : 'Registered Testers'}</div>
+                  </div>
+                </div>
 
-                    <div className="admin-input-field">
-                      <label>English Bio (ইংরেজি বায়ো)</label>
-                      <textarea 
-                        rows="3"
-                        value={founder.bioEn || ''}
-                        onChange={e => handleFounderChange('bioEn', e.target.value)}
-                      ></textarea>
+                <div className="wp-stat-card purple">
+                  <div className="stat-card-icon"><ShieldCheck size={22} /></div>
+                  <div>
+                    <div className="stat-card-val">Active</div>
+                    <div className="stat-card-label">{lang === 'bn' ? 'সিস্টেম স্ট্যাটাস' : 'Play Protect Verified'}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* TAB 1: APPS MANAGEMENT */}
+              {activeTab === 'apps' && (
+                <div className="admin-tab-content">
+                  <div className="tab-actions-header">
+                    <div>
+                      <h3>{lang === 'bn' ? 'অ্যাপস তালিকা ও তথ্য সম্পাদনা' : 'Android App Catalog Management'}</h3>
+                      <p className="subtext">{lang === 'bn' ? 'আপনার সকল পাবলিশড ও বিটা অ্যাপস যোগ, এডিট বা ডিলিট করুন' : 'Add, modify details, change status, or remove apps'}</p>
                     </div>
+                    <button className="admin-btn-success" onClick={handleOpenAddApp}>
+                      <Plus size={18} />
+                      <span>{lang === 'bn' ? 'নতুন অ্যাপ যোগ করুন' : 'Add New App'}</span>
+                    </button>
                   </div>
 
-                  {/* Skills Editor */}
-                  <div className="admin-card-section">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4>⚡ Technical Skills ({founder.skills?.length || 0})</h4>
-                      <button className="admin-btn-sm-success" onClick={handleAddSkill}>
-                        <Plus size={14} /> Add Skill
-                      </button>
-                    </div>
+                  <div className="admin-apps-list-grid">
+                    {appsList.map((app) => (
+                      <div className="admin-app-item-card" key={app.id}>
+                        <div className="app-card-left">
+                          <img src={app.icon} alt={app.title} className="admin-app-thumb" />
+                          <div className="app-card-meta">
+                            <div className="flex items-center gap-2">
+                              <h4 className="app-card-title">{app.title}</h4>
+                              <span className={`admin-status-badge ${app.status}`}>
+                                {app.status.toUpperCase()}
+                              </span>
+                              {app.isFeaturedBeta && (
+                                <span className="admin-status-badge featured">⭐ Featured Beta</span>
+                              )}
+                            </div>
+                            <p className="app-card-tagline">{app.tagline}</p>
+                            <div className="app-card-subinfo">
+                              <span>Category: <strong>{app.category}</strong></span> • 
+                              <span> Version: <strong>{app.version}</strong></span> • 
+                              <span> Size: <strong>{app.size}</strong></span>
+                            </div>
+                          </div>
+                        </div>
 
-                    <div className="skills-tags-manager">
-                      {founder.skills?.map((sk, idx) => (
-                        <div className="admin-skill-chip-edit" key={idx}>
-                          <span><strong>{sk.name}</strong> ({sk.level})</span>
-                          <button onClick={() => handleDeleteSkill(idx)} title="Remove skill">
-                            <X size={14} />
+                        <div className="app-card-right-actions">
+                          <button 
+                            className="admin-btn-edit"
+                            onClick={() => handleOpenEditApp(app)}
+                            title="Edit App Details"
+                          >
+                            <Edit3 size={16} />
+                            <span>{lang === 'bn' ? 'এডিট' : 'Edit'}</span>
+                          </button>
+                          <button 
+                            className="admin-btn-delete"
+                            onClick={() => handleDeleteApp(app.id)}
+                            title="Delete App"
+                          >
+                            <Trash2 size={16} />
                           </button>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Social Links */}
-                  <div className="admin-card-section">
-                    <h4>🌐 Social Media & Contact Links</h4>
-                    <div className="admin-input-field">
-                      <label>Telegram Link</label>
-                      <input 
-                        type="text" 
-                        value={founder.socials?.telegram || ''}
-                        onChange={e => handleFounderSocialChange('telegram', e.target.value)}
-                      />
-                    </div>
-
-                    <div className="admin-input-field">
-                      <label>WhatsApp Group Link</label>
-                      <input 
-                        type="text" 
-                        value={founder.socials?.whatsappGroup || ''}
-                        onChange={e => handleFounderSocialChange('whatsappGroup', e.target.value)}
-                      />
-                    </div>
-
-                    <div className="admin-input-field">
-                      <label>Email Support</label>
-                      <input 
-                        type="text" 
-                        value={founder.socials?.email || ''}
-                        onChange={e => handleFounderSocialChange('email', e.target.value)}
-                      />
-                    </div>
-
-                    <div className="admin-input-field">
-                      <label>Play Store Developer Profile</label>
-                      <input 
-                        type="text" 
-                        value={founder.socials?.playStore || ''}
-                        onChange={e => handleFounderSocialChange('playStore', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 3: HERO & SITE CONFIG */}
-            {activeTab === 'site' && (
-              <div className="admin-tab-content">
-                <div className="tab-actions-header">
-                  <div>
-                    <h3>{lang === 'bn' ? 'হিরো সেকশন ও ওয়েব পরিচিতি সেটিংস' : 'Hero Section & Site Customization'}</h3>
-                    <p className="subtext">{lang === 'bn' ? 'ওয়েবসাইটের টাইটেল, মেসেজ, ব্যাকগ্রাউন্ড ও লোকেশন এডিট করুন' : 'Edit hero banner texts, protect badges, support info and background animations'}</p>
-                  </div>
-                </div>
-
-                <div className="admin-form-grid-2col">
-                  <div className="admin-card-section">
-                    <h4>🔥 Hero Title & Subtitles</h4>
-                    <div className="admin-input-field">
-                      <label>Hero Title (Bangla)</label>
-                      <input 
-                        type="text" 
-                        value={siteSettings.heroTitleBn || ''}
-                        onChange={e => handleSiteSettingChange('heroTitleBn', e.target.value)}
-                      />
-                    </div>
-
-                    <div className="admin-input-field">
-                      <label>Hero Subtitle (Bangla)</label>
-                      <textarea 
-                        rows="2"
-                        value={siteSettings.heroSubtitleBn || ''}
-                        onChange={e => handleSiteSettingChange('heroSubtitleBn', e.target.value)}
-                      ></textarea>
-                    </div>
-
-                    <div className="admin-input-field">
-                      <label>Hero Subtitle (English)</label>
-                      <textarea 
-                        rows="2"
-                        value={siteSettings.heroSubtitleEn || ''}
-                        onChange={e => handleSiteSettingChange('heroSubtitleEn', e.target.value)}
-                      ></textarea>
-                    </div>
-                  </div>
-
-                  <div className="admin-card-section">
-                    <h4>🛡️ Badges & Location Info</h4>
-                    <div className="admin-input-field">
-                      <label>Security Badge Text</label>
-                      <input 
-                        type="text" 
-                        value={siteSettings.protectBadgeText || ''}
-                        onChange={e => handleSiteSettingChange('protectBadgeText', e.target.value)}
-                      />
-                    </div>
-
-                    <div className="admin-input-field">
-                      <label>Age Rating Text</label>
-                      <input 
-                        type="text" 
-                        value={siteSettings.ageRatingText || ''}
-                        onChange={e => handleSiteSettingChange('ageRatingText', e.target.value)}
-                      />
-                    </div>
-
-                    <div className="admin-input-field">
-                      <label>Support Email Address</label>
-                      <input 
-                        type="text" 
-                        value={siteSettings.supportEmail || ''}
-                        onChange={e => handleSiteSettingChange('supportEmail', e.target.value)}
-                      />
-                    </div>
-
-                    <div className="admin-input-field">
-                      <label>Office Address / Location</label>
-                      <input 
-                        type="text" 
-                        value={siteSettings.officeLocation || ''}
-                        onChange={e => handleSiteSettingChange('officeLocation', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 4: INBOX MESSAGES & BETA TESTERS DATABASE */}
-            {activeTab === 'testers' && (
-              <div className="admin-tab-content">
-                <div className="tab-actions-header">
-                  <div>
-                    <h3>{lang === 'bn' ? 'ইমেইল ইনবক্স বার্তা ও বিটা টেস্টার সমুহ' : 'Inbox Messages & Beta Testers'}</h3>
-                    <p className="subtext">{lang === 'bn' ? 'ইউজারদের পাঠানো বার্তা দেখুন এবং এক ক্লিকে সরাসরি ইমেইল রিপ্লাই দিন' : 'View contact messages and beta tester emails with direct reply'}</p>
-                  </div>
-
-                  {/* Sub-tab pills */}
-                  <div className="inbox-subtab-pills">
-                    <button 
-                      className={`subtab-pill ${inboxSubTab === 'messages' ? 'active' : ''}`}
-                      onClick={() => setInboxSubTab('messages')}
-                    >
-                      <Mail size={15} />
-                      <span>{lang === 'bn' ? 'কন্টাক্ট বার্তা (' + contactMessages.length + ')' : 'Messages (' + contactMessages.length + ')'}</span>
-                      {unreadMessagesCount > 0 && <span className="pill-unread-dot"></span>}
-                    </button>
-
-                    <button 
-                      className={`subtab-pill ${inboxSubTab === 'testers' ? 'active' : ''}`}
-                      onClick={() => setInboxSubTab('testers')}
-                    >
-                      <User size={15} />
-                      <span>{lang === 'bn' ? 'বিটা টেস্টার সমুহ (' + testers.length + ')' : 'Beta Testers (' + testers.length + ')'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* SUB TAB 1: CONTACT MESSAGES */}
-                {inboxSubTab === 'messages' && (
-                  <div className="messages-inbox-wrapper">
-                    {contactMessages.length === 0 ? (
-                      <div className="empty-state py-4 text-center">
-                        <Mail size={40} className="muted-icon mx-auto mb-2" />
-                        <p>{lang === 'bn' ? 'কোনো বার্তা পাওয়া যায়নি।' : 'No contact messages found.'}</p>
                       </div>
-                    ) : (
-                      <div className="contact-messages-cards-list">
-                        {contactMessages.map((msg) => (
-                          <div className={`contact-msg-card ${msg.status || 'unread'}`} key={msg.id}>
-                            <div className="msg-card-top">
-                              <div className="msg-user-info">
-                                <div className="msg-avatar-circle">
-                                  {msg.name?.charAt(0)?.toUpperCase() || 'U'}
-                                </div>
-                                <div>
-                                  <h4 className="msg-user-name">{msg.name}</h4>
-                                  <a href={`mailto:${msg.email}`} className="msg-user-email">{msg.email}</a>
-                                </div>
-                              </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-                              <div className="msg-card-meta-right">
-                                <span className="msg-date-tag">{msg.date}</span>
-                                {msg.status === 'replied' ? (
-                                  <span className="msg-status-badge replied"><Check size={12} /> Replied</span>
-                                ) : (
-                                  <span className="msg-status-badge unread">Unread</span>
-                                )}
-                              </div>
-                            </div>
+              {/* TAB 2: FOUNDER & STUDIO PROFILE */}
+              {activeTab === 'founder' && (
+                <div className="admin-tab-content">
+                  <div className="tab-actions-header">
+                    <div>
+                      <h3>{lang === 'bn' ? 'প্রতিষ্ঠাতা ও স্টুডিও প্রোফাইল এডিটর' : 'Founder & Company Details'}</h3>
+                      <p className="subtext">{lang === 'bn' ? 'ডেভেলপারের তথ্য, বায়ো, ছবি, সাইট লোগো ও স্কিল সেট সমুহ আপডেট করুন' : 'Edit founder info, bios, images, site logo & skills'}</p>
+                    </div>
+                    <button className="admin-btn-primary" onClick={() => showToast('Founder details saved!')}>
+                      <Save size={16} />
+                      <span>{lang === 'bn' ? 'সংরক্ষিত হয়েছে' : 'Saved Live'}</span>
+                    </button>
+                  </div>
 
-                            <div className="msg-card-body mt-2">
-                              <p className="msg-text-content">"{msg.message}"</p>
-                            </div>
+                  <div className="admin-form-grid-2col">
+                    {/* Basic Info */}
+                    <div className="admin-card-section">
+                      <h4>👤 General Details</h4>
+                      <div className="admin-input-field">
+                        <label>Founder Name (নাম)</label>
+                        <input 
+                          type="text" 
+                          value={founder.founderName || ''}
+                          onChange={e => handleFounderChange('founderName', e.target.value)}
+                        />
+                      </div>
 
-                            <div className="msg-card-footer mt-3">
-                              <button 
-                                className="admin-btn-reply-email"
-                                onClick={() => handleReplyToContactMessage(msg)}
-                              >
-                                <Reply size={15} />
-                                <span>{lang === 'bn' ? '✉️ সরাসরি ইমেইলে রিপ্লাই দিন' : '✉️ Reply via Email'}</span>
-                              </button>
+                      <div className="admin-input-field">
+                        <label>Founder Role / Title (পদবী)</label>
+                        <input 
+                          type="text" 
+                          value={founder.founderRole || ''}
+                          onChange={e => handleFounderChange('founderRole', e.target.value)}
+                        />
+                      </div>
 
-                              <button 
-                                className="admin-btn-delete-sm"
-                                onClick={() => handleDeleteContactMessage(msg.id)}
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
+                      <div className="admin-input-field">
+                        <label>Company Name (প্রতিষ্ঠানের নাম)</label>
+                        <input 
+                          type="text" 
+                          value={founder.companyName || ''}
+                          onChange={e => handleFounderChange('companyName', e.target.value)}
+                        />
+                      </div>
+
+                      {/* Site Logo Uploader */}
+                      <div className="admin-input-field">
+                        <label>Site Logo (ওয়েবসাইট লোগো)</label>
+                        <div className="admin-image-uploader-box">
+                          <img src={founder.logo || '/assets/logo.png'} alt="Site Logo" className="image-preview-thumb logo" />
+                          <div className="uploader-controls">
+                            <label className="admin-upload-btn">
+                              <Upload size={14} />
+                              <span>{lang === 'bn' ? 'লোগো ফাইল আপলোড' : 'Upload Logo File'}</span>
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={e => handleFileUpload(e, dataUrl => handleFounderChange('logo', dataUrl))}
+                                style={{ display: 'none' }}
+                              />
+                            </label>
+                            <input 
+                              type="text" 
+                              placeholder="or Image URL..."
+                              value={founder.logo || ''}
+                              onChange={e => handleFounderChange('logo', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Founder Photo Uploader */}
+                      <div className="admin-input-field">
+                        <label>Founder Avatar Photo (ডেভেলপারের ছবি)</label>
+                        <div className="admin-image-uploader-box">
+                          <img src={founder.avatar || '/assets/shuvo_photo.png'} alt="Founder Photo" className="image-preview-thumb avatar" />
+                          <div className="uploader-controls">
+                            <label className="admin-upload-btn">
+                              <Upload size={14} />
+                              <span>{lang === 'bn' ? 'ছবি ফাইল আপলোড' : 'Upload Photo File'}</span>
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={e => handleFileUpload(e, dataUrl => handleFounderChange('avatar', dataUrl))}
+                                style={{ display: 'none' }}
+                              />
+                            </label>
+                            <input 
+                              type="text" 
+                              placeholder="or Image URL..."
+                              value={founder.avatar || ''}
+                              onChange={e => handleFounderChange('avatar', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bios */}
+                    <div className="admin-card-section">
+                      <h4>📝 Founder Bio & Taglines</h4>
+                      <div className="admin-input-field">
+                        <label>Bangla Bio (বাংলা বায়ো)</label>
+                        <textarea 
+                          rows="3"
+                          value={founder.bioBn || ''}
+                          onChange={e => handleFounderChange('bioBn', e.target.value)}
+                        ></textarea>
+                      </div>
+
+                      <div className="admin-input-field">
+                        <label>English Bio (ইংরেজি বায়ো)</label>
+                        <textarea 
+                          rows="3"
+                          value={founder.bioEn || ''}
+                          onChange={e => handleFounderChange('bioEn', e.target.value)}
+                        ></textarea>
+                      </div>
+                    </div>
+
+                    {/* Skills Editor */}
+                    <div className="admin-card-section">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4>⚡ Technical Skills ({founder.skills?.length || 0})</h4>
+                        <button className="admin-btn-sm-success" onClick={handleAddSkill}>
+                          <Plus size={14} /> Add Skill
+                        </button>
+                      </div>
+
+                      <div className="skills-tags-manager">
+                        {founder.skills?.map((sk, idx) => (
+                          <div className="admin-skill-chip-edit" key={idx}>
+                            <span><strong>{sk.name}</strong> ({sk.level})</span>
+                            <button onClick={() => handleDeleteSkill(idx)} title="Remove skill">
+                              <X size={14} />
+                            </button>
                           </div>
                         ))}
                       </div>
-                    )}
-                  </div>
-                )}
-
-                {/* SUB TAB 2: BETA TESTERS DATABASE */}
-                {inboxSubTab === 'testers' && (
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4>📱 Registered Beta Testers List</h4>
-                      <button className="admin-btn-primary" onClick={handleExportCSV} disabled={testers.length === 0}>
-                        <Download size={15} />
-                        <span>{lang === 'bn' ? 'সিএসভি ডাউনলোড (Export CSV)' : 'Export CSV'}</span>
-                      </button>
                     </div>
 
-                    {/* Add Manual Tester Box */}
-                    <div className="admin-card-section mb-4">
-                      <h4>➕ Add Manual Beta Tester (ম্যানুয়ালি টেস্টার যোগ করুন)</h4>
-                      <form onSubmit={handleAddManualTester} className="manual-tester-inline-form">
-                        <input type="text" name="testerName" placeholder="Full Name" required />
-                        <input type="email" name="testerEmail" placeholder="Google Play Email" required />
-                        <select name="testerOs" defaultValue="Android">
-                          <option value="Android">Android</option>
-                          <option value="Windows">Windows</option>
-                          <option value="iOS">iOS</option>
-                        </select>
-                        <input type="text" name="testerApp" placeholder="Target App" defaultValue="Money Manage Pro" />
-                        <button type="submit" className="admin-btn-success">
-                          <Plus size={16} /> Add Tester
+                    {/* Social Links */}
+                    <div className="admin-card-section">
+                      <h4>🌐 Social Media & Contact Links</h4>
+                      <div className="admin-input-field">
+                        <label>Telegram Link</label>
+                        <input 
+                          type="text" 
+                          value={founder.socials?.telegram || ''}
+                          onChange={e => handleFounderSocialChange('telegram', e.target.value)}
+                        />
+                      </div>
+
+                      <div className="admin-input-field">
+                        <label>WhatsApp Group Link</label>
+                        <input 
+                          type="text" 
+                          value={founder.socials?.whatsappGroup || ''}
+                          onChange={e => handleFounderSocialChange('whatsappGroup', e.target.value)}
+                        />
+                      </div>
+
+                      <div className="admin-input-field">
+                        <label>Email Support</label>
+                        <input 
+                          type="text" 
+                          value={founder.socials?.email || ''}
+                          onChange={e => handleFounderSocialChange('email', e.target.value)}
+                        />
+                      </div>
+
+                      <div className="admin-input-field">
+                        <label>Play Store Developer Profile</label>
+                        <input 
+                          type="text" 
+                          value={founder.socials?.playStore || ''}
+                          onChange={e => handleFounderSocialChange('playStore', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: HERO & SITE CONFIG */}
+              {activeTab === 'site' && (
+                <div className="admin-tab-content">
+                  <div className="tab-actions-header">
+                    <div>
+                      <h3>{lang === 'bn' ? 'হিরো সেকশন ও ওয়েব পরিচিতি সেটিংস' : 'Hero Section & Site Customization'}</h3>
+                      <p className="subtext">{lang === 'bn' ? 'ওয়েবসাইটের টাইটেল, মেসেজ, ব্যাকগ্রাউন্ড ও লোকেশন এডিট করুন' : 'Edit hero banner texts, protect badges, support info and background animations'}</p>
+                    </div>
+                  </div>
+
+                  <div className="admin-form-grid-2col">
+                    <div className="admin-card-section">
+                      <h4>🔥 Hero Title & Subtitles</h4>
+                      <div className="admin-input-field">
+                        <label>Hero Title (Bangla)</label>
+                        <input 
+                          type="text" 
+                          value={siteSettings.heroTitleBn || ''}
+                          onChange={e => handleSiteSettingChange('heroTitleBn', e.target.value)}
+                        />
+                      </div>
+
+                      <div className="admin-input-field">
+                        <label>Hero Subtitle (Bangla)</label>
+                        <textarea 
+                          rows="2"
+                          value={siteSettings.heroSubtitleBn || ''}
+                          onChange={e => handleSiteSettingChange('heroSubtitleBn', e.target.value)}
+                        ></textarea>
+                      </div>
+
+                      <div className="admin-input-field">
+                        <label>Hero Subtitle (English)</label>
+                        <textarea 
+                          rows="2"
+                          value={siteSettings.heroSubtitleEn || ''}
+                          onChange={e => handleSiteSettingChange('heroSubtitleEn', e.target.value)}
+                        ></textarea>
+                      </div>
+                    </div>
+
+                    <div className="admin-card-section">
+                      <h4>🛡️ Badges & Location Info</h4>
+                      <div className="admin-input-field">
+                        <label>Security Badge Text</label>
+                        <input 
+                          type="text" 
+                          value={siteSettings.protectBadgeText || ''}
+                          onChange={e => handleSiteSettingChange('protectBadgeText', e.target.value)}
+                        />
+                      </div>
+
+                      <div className="admin-input-field">
+                        <label>Age Rating Text</label>
+                        <input 
+                          type="text" 
+                          value={siteSettings.ageRatingText || ''}
+                          onChange={e => handleSiteSettingChange('ageRatingText', e.target.value)}
+                        />
+                      </div>
+
+                      <div className="admin-input-field">
+                        <label>Support Email Address</label>
+                        <input 
+                          type="text" 
+                          value={siteSettings.supportEmail || ''}
+                          onChange={e => handleSiteSettingChange('supportEmail', e.target.value)}
+                        />
+                      </div>
+
+                      <div className="admin-input-field">
+                        <label>Office Address / Location</label>
+                        <input 
+                          type="text" 
+                          value={siteSettings.officeLocation || ''}
+                          onChange={e => handleSiteSettingChange('officeLocation', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: INBOX MESSAGES & BETA TESTERS DATABASE */}
+              {activeTab === 'testers' && (
+                <div className="admin-tab-content">
+                  <div className="tab-actions-header">
+                    <div>
+                      <h3>{lang === 'bn' ? 'ইমেইল ইনবক্স বার্তা ও বিটা টেস্টার সমুহ' : 'Inbox Messages & Beta Testers'}</h3>
+                      <p className="subtext">{lang === 'bn' ? 'ইউজারদের পাঠানো বার্তা দেখুন এবং এক ক্লিকে সরাসরি ইমেইল রিপ্লাই দিন' : 'View contact messages and beta tester emails with direct reply'}</p>
+                    </div>
+
+                    {/* Sub-tab pills */}
+                    <div className="inbox-subtab-pills">
+                      <button 
+                        className={`subtab-pill ${inboxSubTab === 'messages' ? 'active' : ''}`}
+                        onClick={() => setInboxSubTab('messages')}
+                      >
+                        <Mail size={15} />
+                        <span>{lang === 'bn' ? 'কন্টাক্ট বার্তা (' + contactMessages.length + ')' : 'Messages (' + contactMessages.length + ')'}</span>
+                        {unreadMessagesCount > 0 && <span className="pill-unread-dot"></span>}
+                      </button>
+
+                      <button 
+                        className={`subtab-pill ${inboxSubTab === 'testers' ? 'active' : ''}`}
+                        onClick={() => setInboxSubTab('testers')}
+                      >
+                        <User size={15} />
+                        <span>{lang === 'bn' ? 'বিটা টেস্টার সমুহ (' + testers.length + ')' : 'Beta Testers (' + testers.length + ')'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* SUB TAB 1: CONTACT MESSAGES */}
+                  {inboxSubTab === 'messages' && (
+                    <div className="messages-inbox-wrapper">
+                      {contactMessages.length === 0 ? (
+                        <div className="empty-state py-4 text-center">
+                          <Mail size={40} className="muted-icon mx-auto mb-2" />
+                          <p>{lang === 'bn' ? 'কোনো বার্তা পাওয়া যায়নি।' : 'No contact messages found.'}</p>
+                        </div>
+                      ) : (
+                        <div className="contact-messages-cards-list">
+                          {contactMessages.map((msg) => (
+                            <div className={`contact-msg-card ${msg.status || 'unread'}`} key={msg.id}>
+                              <div className="msg-card-top">
+                                <div className="msg-user-info">
+                                  <div className="msg-avatar-circle">
+                                    {msg.name?.charAt(0)?.toUpperCase() || 'U'}
+                                  </div>
+                                  <div>
+                                    <h4 className="msg-user-name">{msg.name}</h4>
+                                    <a href={`mailto:${msg.email}`} className="msg-user-email">{msg.email}</a>
+                                  </div>
+                                </div>
+
+                                <div className="msg-card-meta-right">
+                                  <span className="msg-date-tag">{msg.date}</span>
+                                  {msg.status === 'replied' ? (
+                                    <span className="msg-status-badge replied"><Check size={12} /> Replied</span>
+                                  ) : (
+                                    <span className="msg-status-badge unread">Unread</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="msg-card-body mt-2">
+                                <p className="msg-text-content">"{msg.message}"</p>
+                              </div>
+
+                              <div className="msg-card-footer mt-3">
+                                <button 
+                                  className="admin-btn-reply-email"
+                                  onClick={() => handleReplyToContactMessage(msg)}
+                                >
+                                  <Reply size={15} />
+                                  <span>{lang === 'bn' ? '✉️ সরাসরি ইমেইলে রিপ্লাই দিন' : '✉️ Reply via Email'}</span>
+                                </button>
+
+                                <button 
+                                  className="admin-btn-delete-sm"
+                                  onClick={() => handleDeleteContactMessage(msg.id)}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* SUB TAB 2: BETA TESTERS DATABASE */}
+                  {inboxSubTab === 'testers' && (
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4>📱 Registered Beta Testers List</h4>
+                        <button className="admin-btn-primary" onClick={handleExportCSV} disabled={testers.length === 0}>
+                          <Download size={15} />
+                          <span>{lang === 'bn' ? 'সিএসভি ডাউনলোড (Export CSV)' : 'Export CSV'}</span>
                         </button>
+                      </div>
+
+                      {/* Add Manual Tester Box */}
+                      <div className="admin-card-section mb-4">
+                        <h4>➕ Add Manual Beta Tester (ম্যানুয়ালি টেস্টার যোগ করুন)</h4>
+                        <form onSubmit={handleAddManualTester} className="manual-tester-inline-form">
+                          <input type="text" name="testerName" placeholder="Full Name" required />
+                          <input type="email" name="testerEmail" placeholder="Google Play Email" required />
+                          <select name="testerOs" defaultValue="Android">
+                            <option value="Android">Android</option>
+                            <option value="Windows">Windows</option>
+                            <option value="iOS">iOS</option>
+                          </select>
+                          <input type="text" name="testerApp" placeholder="Target App" defaultValue="Money Manage Pro" />
+                          <button type="submit" className="admin-btn-success">
+                            <Plus size={16} /> Add Tester
+                          </button>
+                        </form>
+                      </div>
+
+                      {/* Table */}
+                      <div className="admin-table-wrapper">
+                        {testers.length === 0 ? (
+                          <div className="empty-state py-4 text-center">
+                            <Mail size={40} className="muted-icon mx-auto mb-2" />
+                            <p>{lang === 'bn' ? 'কোনো বিটা টেস্টারের আবেদন পাওয়া যায়নি।' : 'No beta tester submissions found.'}</p>
+                          </div>
+                        ) : (
+                          <table className="admin-table">
+                            <thead>
+                              <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Target App</th>
+                                <th>Date</th>
+                                <th>Action / Reply</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {testers.map((t, idx) => (
+                                <tr key={t.id || idx}>
+                                  <td>{idx + 1}</td>
+                                  <td><strong>{t.name}</strong></td>
+                                  <td className="highlight-email">{t.email}</td>
+                                  <td>{t.appName}</td>
+                                  <td>{t.date}</td>
+                                  <td>
+                                    <div className="flex items-center gap-2">
+                                      <button 
+                                        className="admin-btn-reply-email-sm"
+                                        onClick={() => handleReplyToTester(t)}
+                                        title="Send Play Store Invite Email"
+                                      >
+                                        <Send size={13} />
+                                        <span>{lang === 'bn' ? 'ইনভাইট মেইল' : 'Send Invite'}</span>
+                                      </button>
+                                      <button 
+                                        className="admin-btn-sm-danger"
+                                        onClick={() => handleDeleteTester(t.id)}
+                                        title="Delete tester"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              )}
+
+              {/* TAB 5: BACKUP & SYSTEM SETTINGS */}
+              {activeTab === 'backup' && (
+                <div className="admin-tab-content">
+                  <div className="tab-actions-header">
+                    <div>
+                      <h3>{lang === 'bn' ? 'সিস্টেম ব্যাকআপ ও সিকিউরিটি' : 'Backup, System Restore & Admin Security'}</h3>
+                      <p className="subtext">{lang === 'bn' ? 'অ্যাডমিন পাসওয়ার্ড পরির্তন, সম্পূর্ণ ব্যাকআপ ফাইল এক্সপোর্ট/ইম্পোর্ট করুন' : 'Manage Admin password, save JSON snapshot of site, or restore default data'}</p>
+                    </div>
+                  </div>
+
+                  <div className="admin-form-grid-2col">
+                    {/* Password Change Form Section */}
+                    <div className="admin-card-section">
+                      <h4 style={{ color: '#00e676', display: 'flex', items: 'center', gap: '8px' }}>
+                        <Key size={18} />
+                        <span>{lang === 'bn' ? '🔑 অ্যাডমিন পাসওয়ার্ড পরিবর্তন' : '🔑 Change Admin Password'}</span>
+                      </h4>
+
+                      <form onSubmit={handleUpdateAdminPassword} className="change-password-form">
+                        <div className="admin-input-field">
+                          <label>{lang === 'bn' ? 'বর্তমান পাসওয়ার্ড (Current Password)' : 'Current Password'}</label>
+                          <input 
+                            type={showPwdFormToggle ? 'text' : 'password'}
+                            required
+                            placeholder={lang === 'bn' ? 'বর্তমান পাসওয়ার্ডটি লিখুন...' : 'Enter current password...'}
+                            value={pwdChangeForm.current}
+                            onChange={e => setPwdChangeForm({ ...pwdChangeForm, current: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="admin-input-field">
+                          <label>{lang === 'bn' ? 'নতুন পাসওয়ার্ড (New Password)' : 'New Password'}</label>
+                          <input 
+                            type={showPwdFormToggle ? 'text' : 'password'}
+                            required
+                            placeholder={lang === 'bn' ? 'নতুন পাসওয়ার্ডটি লিখুন...' : 'Enter new password...'}
+                            value={pwdChangeForm.newPwd}
+                            onChange={e => setPwdChangeForm({ ...pwdChangeForm, newPwd: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="admin-input-field">
+                          <label>{lang === 'bn' ? 'পুনরায় নতুন পাসওয়ার্ড (Confirm New Password)' : 'Confirm New Password'}</label>
+                          <input 
+                            type={showPwdFormToggle ? 'text' : 'password'}
+                            required
+                            placeholder={lang === 'bn' ? 'পুনরায় নতুন পাসওয়ার্ড লিখুন...' : 'Re-enter new password...'}
+                            value={pwdChangeForm.confirmPwd}
+                            onChange={e => setPwdChangeForm({ ...pwdChangeForm, confirmPwd: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between mt-2">
+                          <button 
+                            type="button" 
+                            className="pwd-toggle-text-btn"
+                            onClick={() => setShowPwdFormToggle(!showPwdFormToggle)}
+                            style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '0.8rem', cursor: 'pointer' }}
+                          >
+                            {showPwdFormToggle ? '🙈 Hide Passwords' : '👁️ Show Passwords'}
+                          </button>
+
+                          <button type="submit" className="admin-btn-success">
+                            <Save size={15} />
+                            <span>{lang === 'bn' ? 'পাসওয়ার্ড সেভ করুন' : 'Update Password'}</span>
+                          </button>
+                        </div>
                       </form>
                     </div>
 
-                    {/* Table */}
-                    <div className="admin-table-wrapper">
-                      {testers.length === 0 ? (
-                        <div className="empty-state py-4 text-center">
-                          <Mail size={40} className="muted-icon mx-auto mb-2" />
-                          <p>{lang === 'bn' ? 'কোনো বিটা টেস্টারের আবেদন পাওয়া যায়নি।' : 'No beta tester submissions found.'}</p>
-                        </div>
-                      ) : (
-                        <table className="admin-table">
-                          <thead>
-                            <tr>
-                              <th>#</th>
-                              <th>Name</th>
-                              <th>Email</th>
-                              <th>Target App</th>
-                              <th>Date</th>
-                              <th>Action / Reply</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {testers.map((t, idx) => (
-                              <tr key={t.id || idx}>
-                                <td>{idx + 1}</td>
-                                <td><strong>{t.name}</strong></td>
-                                <td className="highlight-email">{t.email}</td>
-                                <td>{t.appName}</td>
-                                <td>{t.date}</td>
-                                <td>
-                                  <div className="flex items-center gap-2">
-                                    <button 
-                                      className="admin-btn-reply-email-sm"
-                                      onClick={() => handleReplyToTester(t)}
-                                      title="Send Play Store Invite Email"
-                                    >
-                                      <Send size={13} />
-                                      <span>{lang === 'bn' ? 'ইনভাইট মেইল' : 'Send Invite'}</span>
-                                    </button>
-                                    <button 
-                                      className="admin-btn-sm-danger"
-                                      onClick={() => handleDeleteTester(t.id)}
-                                      title="Delete tester"
-                                    >
-                                      <Trash2 size={14} />
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      )}
+                    {/* Export / Import Backup JSON */}
+                    <div className="admin-card-section">
+                      <h4>💾 JSON Backup & Restore</h4>
+                      <p className="subtext mb-3">
+                        {lang === 'bn' 
+                          ? 'আপনার অ্যাপস, প্রোফাইল ও সেটিংস সহ পুরো সাইটের ডাটা একটি ফাইলে ডাউনলোড করে রাখুন।' 
+                          : 'Download a full snapshot file of apps, profile and settings.'}
+                      </p>
+
+                      <div className="flex gap-2 wrap-actions">
+                        <button className="admin-btn-primary" onClick={handleExportFullJSON}>
+                          <Download size={16} />
+                          <span>Export Backup JSON</span>
+                        </button>
+
+                        <label className="admin-btn-secondary-file-input">
+                          <Upload size={16} />
+                          <span>Import Backup JSON</span>
+                          <input type="file" accept=".json" onChange={handleImportFullJSON} style={{ display: 'none' }} />
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                )}
 
-              </div>
-            )}
-
-            {/* TAB 5: BACKUP & SYSTEM SETTINGS */}
-            {activeTab === 'backup' && (
-              <div className="admin-tab-content">
-                <div className="tab-actions-header">
-                  <div>
-                    <h3>{lang === 'bn' ? 'সিস্টেম ব্যাকআপ ও সিকিউরিটি' : 'Backup, System Restore & Admin Security'}</h3>
-                    <p className="subtext">{lang === 'bn' ? 'অ্যাডমিন পাসওয়ার্ড পরির্তন, সম্পূর্ণ ব্যাকআপ ফাইল এক্সপোর্ট/ইম্পোর্ট করুন' : 'Manage Admin password, save JSON snapshot of site, or restore default data'}</p>
-                  </div>
-                </div>
-
-                <div className="admin-form-grid-2col">
-                  {/* Password Change Form Section */}
-                  <div className="admin-card-section">
-                    <h4 style={{ color: '#00e676', display: 'flex', items: 'center', gap: '8px' }}>
-                      <Key size={18} />
-                      <span>{lang === 'bn' ? '🔑 অ্যাডমিন পাসওয়ার্ড পরিবর্তন' : '🔑 Change Admin Password'}</span>
-                    </h4>
-
-                    <form onSubmit={handleUpdateAdminPassword} className="change-password-form">
-                      <div className="admin-input-field">
-                        <label>{lang === 'bn' ? 'বর্তমান পাসওয়ার্ড (Current Password)' : 'Current Password'}</label>
-                        <input 
-                          type={showPwdFormToggle ? 'text' : 'password'}
-                          required
-                          placeholder={lang === 'bn' ? 'বর্তমান পাসওয়ার্ডটি লিখুন...' : 'Enter current password...'}
-                          value={pwdChangeForm.current}
-                          onChange={e => setPwdChangeForm({ ...pwdChangeForm, current: e.target.value })}
-                        />
+                    {/* Factory Reset */}
+                    <div className="admin-card-section full-width danger-section mt-2">
+                      <div className="flex items-center gap-2 mb-1 text-danger">
+                        <AlertTriangle size={20} />
+                        <h4 style={{ margin: 0 }}>Factory Reset (অরিজিনাল ডাটায় ফিরে যান)</h4>
                       </div>
+                      <p className="subtext mb-3">
+                        {lang === 'bn' 
+                          ? 'যদি কোনো ভুল হয় তবে এক ক্লিকে সাইটের অরিজিনাল বালুকা সফট ডাটায় রিস্টোর করুন।' 
+                          : 'Reset all customized apps, bios and settings back to original initial data.'}
+                      </p>
 
-                      <div className="admin-input-field">
-                        <label>{lang === 'bn' ? 'নতুন পাসওয়ার্ড (New Password)' : 'New Password'}</label>
-                        <input 
-                          type={showPwdFormToggle ? 'text' : 'password'}
-                          required
-                          placeholder={lang === 'bn' ? 'নতুন পাসওয়ার্ডটি লিখুন...' : 'Enter new password...'}
-                          value={pwdChangeForm.newPwd}
-                          onChange={e => setPwdChangeForm({ ...pwdChangeForm, newPwd: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="admin-input-field">
-                        <label>{lang === 'bn' ? 'পুনরায় নতুন পাসওয়ার্ড (Confirm New Password)' : 'Confirm New Password'}</label>
-                        <input 
-                          type={showPwdFormToggle ? 'text' : 'password'}
-                          required
-                          placeholder={lang === 'bn' ? 'পুনরায় নতুন পাসওয়ার্ড লিখুন...' : 'Re-enter new password...'}
-                          value={pwdChangeForm.confirmPwd}
-                          onChange={e => setPwdChangeForm({ ...pwdChangeForm, confirmPwd: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between mt-2">
-                        <button 
-                          type="button" 
-                          className="pwd-toggle-text-btn"
-                          onClick={() => setShowPwdFormToggle(!showPwdFormToggle)}
-                          style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '0.8rem', cursor: 'pointer' }}
-                        >
-                          {showPwdFormToggle ? '🙈 Hide Passwords' : '👁️ Show Passwords'}
-                        </button>
-
-                        <button type="submit" className="admin-btn-success">
-                          <Save size={15} />
-                          <span>{lang === 'bn' ? 'পাসওয়ার্ড সেভ করুন' : 'Update Password'}</span>
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-
-                  {/* Export / Import Backup JSON */}
-                  <div className="admin-card-section">
-                    <h4>💾 JSON Backup & Restore</h4>
-                    <p className="subtext mb-3">
-                      {lang === 'bn' 
-                        ? 'আপনার অ্যাপস, প্রোফাইল ও সেটিংস সহ পুরো সাইটের ডাটা একটি ফাইলে ডাউনলোড করে রাখুন।' 
-                        : 'Download a full snapshot file of apps, profile and settings.'}
-                    </p>
-
-                    <div className="flex gap-2 wrap-actions">
-                      <button className="admin-btn-primary" onClick={handleExportFullJSON}>
-                        <Download size={16} />
-                        <span>Export Backup JSON</span>
+                      <button className="admin-btn-danger" onClick={handleResetToDefaults}>
+                        <RotateCcw size={16} />
+                        <span>{lang === 'bn' ? 'অরিজিনাল ডেফোল্ট ডাটায় রিস্টোর করুন' : 'Reset All to Factory Defaults'}</span>
                       </button>
-
-                      <label className="admin-btn-secondary-file-input">
-                        <Upload size={16} />
-                        <span>Import Backup JSON</span>
-                        <input type="file" accept=".json" onChange={handleImportFullJSON} style={{ display: 'none' }} />
-                      </label>
                     </div>
-                  </div>
-
-                  {/* Factory Reset */}
-                  <div className="admin-card-section full-width danger-section mt-2">
-                    <div className="flex items-center gap-2 mb-1 text-danger">
-                      <AlertTriangle size={20} />
-                      <h4 style={{ margin: 0 }}>Factory Reset (অরিজিনাল ডাটায় ফিরে যান)</h4>
-                    </div>
-                    <p className="subtext mb-3">
-                      {lang === 'bn' 
-                        ? 'যদি কোনো ভুল হয় তবে এক ক্লিকে সাইটের অরিজিনাল বালুকা সফট ডাটায় রিস্টোর করুন।' 
-                        : 'Reset all customized apps, bios and settings back to original initial data.'}
-                    </p>
-
-                    <button className="admin-btn-danger" onClick={handleResetToDefaults}>
-                      <RotateCcw size={16} />
-                      <span>{lang === 'bn' ? 'অরিজিনাল ডেফোল্ট ডাটায় রিস্টোর করুন' : 'Reset All to Factory Defaults'}</span>
-                    </button>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
 
-      </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* SUB-MODAL: APP ADD / EDIT FORM */}
       {editingApp && (

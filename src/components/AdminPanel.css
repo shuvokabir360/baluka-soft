@@ -1062,6 +1062,398 @@
   background: rgba(0, 230, 118, 0.3);
 }
 
+/* ==========================================================================
+   WordPress Style Full-Page Admin Dashboard Layout
+   ========================================================================== */
+
+.wp-admin-page-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #080f1a;
+  z-index: 999999;
+  overflow: hidden;
+  color: #e2e8f0;
+  font-family: var(--font-family);
+}
+
+.wp-login-page-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  background: radial-gradient(circle at center, #0f1c30 0%, #050b14 100%);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.wp-login-card {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 230, 118, 0.2);
+}
+
+.wp-login-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wp-btn-back-site {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.wp-btn-back-site:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+/* Full Page Dashboard Layout */
+.wp-admin-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* WordPress Dark Left Sidebar */
+.wp-admin-sidebar {
+  width: 260px;
+  background: #0d1626;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.wp-admin-sidebar.collapsed {
+  width: 70px;
+}
+
+.wp-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(6, 12, 22, 0.7);
+}
+
+.wp-sidebar-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(0, 230, 118, 0.4);
+}
+
+.wp-sidebar-brand-text h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.wp-version-tag {
+  font-size: 0.7rem;
+  color: #00e676;
+  font-weight: 700;
+}
+
+.wp-sidebar-nav {
+  flex: 1;
+  padding: 14px 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wp-nav-section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 8px 10px 4px 10px;
+}
+
+.wp-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  width: 100%;
+}
+
+.wp-sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.wp-sidebar-item.active {
+  background: linear-gradient(135deg, rgba(0, 230, 118, 0.2), rgba(0, 176, 255, 0.15));
+  color: #00e676;
+  border-left: 3px solid #00e676;
+  font-weight: 700;
+}
+
+.wp-pill-count {
+  margin-left: auto;
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.wp-unread-badge {
+  margin-left: auto;
+  font-size: 0.72rem;
+  background: #ff5252;
+  color: #ffffff;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.wp-admin-sidebar.collapsed .wp-sidebar-brand-text,
+.wp-admin-sidebar.collapsed .wp-nav-section-label,
+.wp-admin-sidebar.collapsed .wp-sidebar-item span,
+.wp-admin-sidebar.collapsed .wp-pill-count,
+.wp-admin-sidebar.collapsed .wp-unread-badge,
+.wp-admin-sidebar.collapsed .wp-back-to-site-btn span {
+  display: none;
+}
+
+.wp-sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(6, 12, 22, 0.5);
+}
+
+.wp-back-to-site-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px;
+  background: rgba(0, 230, 118, 0.12);
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.3);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wp-back-to-site-btn:hover {
+  background: rgba(0, 230, 118, 0.25);
+}
+
+/* Workspace Main Container */
+.wp-admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: #080f1a;
+}
+
+/* WordPress Top Admin Bar */
+.wp-admin-topbar {
+  height: 56px;
+  background: #0c1524;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+
+.wp-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.wp-sidebar-toggle-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.wp-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.wp-crumb-root {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.wp-crumb-sep {
+  color: #475569;
+}
+
+.wp-crumb-current {
+  color: #00e676;
+  font-weight: 700;
+}
+
+.wp-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.wp-topbar-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wp-user-profile-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px 4px 4px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wp-user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.wp-user-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.wp-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Dashboard Workspace & Quick Stats Row */
+.wp-admin-workspace {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wp-dashboard-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.wp-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(13, 22, 38, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px;
+  border-radius: 14px;
+}
+
+.wp-stat-card.green { border-left: 4px solid #00e676; }
+.wp-stat-card.blue { border-left: 4px solid #38bdf8; }
+.wp-stat-card.orange { border-left: 4px solid #fb923c; }
+.wp-stat-card.purple { border-left: 4px solid #c084fc; }
+
+.stat-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00e676;
+}
+
+.stat-card-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.stat-card-label {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+
 .admin-btn-delete-sm {
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
